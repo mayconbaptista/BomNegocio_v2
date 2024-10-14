@@ -1,0 +1,10 @@
+﻿global using Classifields.Infra.Data.Context;
+global using Classifields.Infra.Data.Repositories;
+global using Classifields.Infra.Data.EntitiesConfiguration;
+global using Classifields.Infra.Data.Identity;
+global using Microsoft.AspNetCore.Identity;
+global using Classifields.Domain.Account;
+global using Classifields.Domain.Entities;
+global using Microsoft.EntityFrameworkCore;
+global using Classifields.Domain.Interfaces;
+global using System.Linq.Expressions;

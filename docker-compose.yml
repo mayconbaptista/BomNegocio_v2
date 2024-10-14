@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+
+  catalog.webapi:
+    image: ${DOCKER_REGISTRY-}catalogwebapi
+    depends_on:
+      - bom_negocio.db
+    build:
+      context: .
+      dockerfile: Catalog.WebApi/Dockerfile
+
+  bom_negocio.db:
+    image: postgres:16.4
+  
+

@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+
+  catalog.webapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "5000:5000"
+      - "5001:5001"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  bom_negocio.db:
+    environment:
+        POSTGRES_DB: catalogDb
+        POSTGRES_USER: catalog
+        POSTGRES_PASSWORD: catalog123
+    ports:
+      - "5432:5432"
+      - "5433:5433"
+    volumes:
+      - bom_negocio.db_data:/var/lib/postgresql/data
+
+volumes:
+  bom_negocio.db_data:
