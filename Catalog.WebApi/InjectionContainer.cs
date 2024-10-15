@@ -6,19 +6,19 @@ namespace Catalog.WebApi
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
 
-            var connection = configuration.GetConnectionString("CatalogConnection3") ?? throw new ArgumentNullException("Connection string not found");
+            var connection = configuration.GetConnectionString("CatalogConnection") ?? throw new ArgumentNullException("Connection string not found");
 
             services.AddDbContext<CatalogContext>(options =>
             {
                 options.UseNpgsql(connection, opt =>
                 {
                     opt.SetPostgresVersion(new Version(16, 4));
-                    //opt.EnableRetryOnFailure(3);
+                    opt.EnableRetryOnFailure(3);
                 });
-                //options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 options.EnableSensitiveDataLogging();
                 options.EnableDetailedErrors();
-                //options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
+                options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
             });
 
             services.AddScoped<IProductRepository, ProductRepository>();

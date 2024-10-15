@@ -16,9 +16,9 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
 
-  bom_negocio.db:
+  bom_negocio.catalogdb:
     environment:
-        POSTGRES_DB: catalogDb
+        POSTGRES_DB: catalog
         POSTGRES_USER: catalog
         POSTGRES_PASSWORD: catalog123
     ports:

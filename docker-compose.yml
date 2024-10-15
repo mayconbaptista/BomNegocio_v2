@@ -5,12 +5,11 @@ services:
   catalog.webapi:
     image: ${DOCKER_REGISTRY-}catalogwebapi
     depends_on:
-      - bom_negocio.db
+      - bom_negocio.catalogdb
     build:
       context: .
       dockerfile: Catalog.WebApi/Dockerfile
 
-  bom_negocio.db:
+  bom_negocio.catalogdb:
     image: postgres:16.4
-  
-
+    container_name: bom_negocio_db

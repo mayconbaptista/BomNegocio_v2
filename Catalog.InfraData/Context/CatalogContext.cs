@@ -1,8 +1,11 @@
 ﻿
+using Microsoft.Extensions.Configuration;
+
 namespace Catalog.InfraData.Context
 {
-    public class CatalogContext(DbContextOptions<CatalogContext> options) : DbContext(options)
+    public class CatalogContext(DbContextOptions<CatalogContext> options, IConfiguration configuration) : DbContext(options)
     {
+        private readonly IConfiguration _configuration = configuration;
         public DbSet<ProductModel> Products { get; set; }
         public DbSet<ImageModel> Images { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
@@ -22,10 +25,16 @@ namespace Catalog.InfraData.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Server=localhost;Database=Catalog;User Id=sa;Password=Password123;", o =>
+            if(!optionsBuilder.IsConfigured)
             {
-                o.SetPostgresVersion(new Version(16, 4));
-            });
+                string connection = _configuration.GetConnectionString("CatalogConnection") ?? throw new ArgumentNullException("Connection string not found");
+
+                optionsBuilder.UseNpgsql(connection, opt =>
+                {
+                    opt.SetPostgresVersion(new Version(16, 4));
+                    opt.EnableRetryOnFailure(3);
+                });
+            }
         }
     }
 }
