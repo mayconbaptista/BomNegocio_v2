@@ -1,6 +1,4 @@
-﻿using Catalog.Domain.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿
 
 namespace Catalog.InfraData.ConfigEntities
 {
@@ -35,7 +33,7 @@ namespace Catalog.InfraData.ConfigEntities
                 .HasColumnType("decimal(10,2)")
                 .IsRequired(true);
 
-            builder.Property(p => p.Amount)
+            builder.Property(p => p.Quantity)
                 .HasColumnName("quantidade")
                 .IsRequired(true);
 

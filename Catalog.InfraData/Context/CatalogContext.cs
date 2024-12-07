@@ -10,8 +10,6 @@ namespace Catalog.InfraData.Context
         public DbSet<ImageModel> Images { get; set; }
         public DbSet<CategoryModel> Categories { get; set; }
 
-        
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

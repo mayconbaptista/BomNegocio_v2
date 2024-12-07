@@ -7,7 +7,7 @@ namespace Catalog.Domain.Interfaces
     {
         public Task<TModel?> GetByIdAsync(int id);
         public TModel? GetById (int id);
-        public Task<ICollection<TModel>> GetAllAsync(Expression<Func<TModel, bool>>? expression,bool asTraking = false);
+        public Task<IList<TModel>> GetAllAsync(Expression<Func<TModel, bool>>? expression = null, bool asTraking = false);
         public Task<TModel?> FindAsync(Expression<Func<TModel, bool>> expression, bool asTraking = false);
         public TModel? Find (Expression<Func<TModel, bool>> expression, bool asTraking = true);
     }

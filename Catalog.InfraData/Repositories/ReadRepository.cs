@@ -41,7 +41,7 @@ namespace Catalog.InfraData.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<ICollection<TModel>> GetAllAsync(Expression<Func<TModel, bool>>? expression, bool asTraking = false)
+        public async Task<IList<TModel>> GetAllAsync(Expression<Func<TModel, bool>>? expression = null, bool asTraking = false)
         {
             var query = _dbSet.AsQueryable();
 

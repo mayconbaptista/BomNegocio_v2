@@ -6,8 +6,11 @@
     <DockerPublishLocally>False</DockerPublishLocally>
     <ProjectGuid>65c43e9e-a2ae-436b-bf61-6bc939213e38</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
-    <DockerServiceName>classifields.webapi</DockerServiceName>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/</DockerServiceUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='newconf|AnyCPU'" />
+  <PropertyGroup>
+    <DockerServiceName>auth.webapi</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

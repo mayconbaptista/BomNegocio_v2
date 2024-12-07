@@ -7,19 +7,11 @@ namespace Catalog.Application.Services
 
         public async Task<ProductModel> GetById(uint id)
         {
-            try
-            {
+            var product = await this._unitOfWork
+                .IProductRepository
+                .FindAsync(x => x.Id == id) ?? throw new Exception("Product not found");
 
-                var product = await this._unitOfWork
-                    .IProductRepository
-                    .FindAsync(x => x.Id == id) ?? throw new Exception("Product not found");
-
-                return product;
-
-            }catch(Exception ex)
-            {
-                throw;
-            }
+            return product;
         }
 
         public async Task<ProductModel> Save (ProductModel product)
@@ -30,6 +22,16 @@ namespace Catalog.Application.Services
             await _unitOfWork.CommitAsync();
 
             return product;
+        }
+
+        public async Task<IList<ProductModel>> GetAll()
+        {
+            return await _unitOfWork.IProductRepository.GetAllAsync();
+        }
+
+        public async Task<IList<ProductModel>> GetAll(int categoryId)
+        {
+            return await this._unitOfWork.IProductRepository.GetAllAsync(x => x.CategoryId == categoryId);
         }
     }
 }

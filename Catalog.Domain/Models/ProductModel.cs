@@ -1,6 +1,4 @@
-﻿using Catalog.Domain.Enums;
-using Catalog.Domain.Validations;
-using FluentValidation;
+﻿using Catalog.Domain.Validations;
 
 namespace Catalog.Domain.Models
 {
@@ -10,7 +8,7 @@ namespace Catalog.Domain.Models
         public string SkuCode { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
-        public uint Amount { get; set; }
+        public uint Quantity { get; set; }
         public uint CategoryId { get; set; }
         public CategoryModel Category { get; set; }
         public ICollection<ImageModel> Images { get; set; } = new List<ImageModel>();

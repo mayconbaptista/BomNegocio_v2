@@ -2,14 +2,32 @@ version: '3.4'
 
 services:
 
-  catalog.webapi:
-    image: ${DOCKER_REGISTRY-}catalogwebapi
-    depends_on:
-      - bom_negocio.catalogdb
-    build:
-      context: .
-      dockerfile: Catalog.WebApi/Dockerfile
+    catalog.webapi:
+        image: ${DOCKER_REGISTRY-}catalogwebapi
+        hostname: catalog
+        container_name: catalog
+        depends_on:
+            - bom_negocio.db
+        build:
+            context: .
+            dockerfile: Catalog.WebApi/Dockerfile
+        profiles: ["vs_debug"]
 
-  bom_negocio.catalogdb:
-    image: postgres:16.4
-    container_name: bom_negocio_db
+    bom_negocio.db:
+        image: postgres:16.4
+        hostname: bom_negocio_db
+        container_name: bn_db
+        profiles: ["vs_debug", "vs_sso_debug"]
+
+
+    auth.webapi:
+        image: ${DOCKER_REGISTRY-}authwebapi
+        hostname: auth
+        container_name: auth
+        build:
+            context: .
+            dockerfile: Auth.WebApi/Dockerfile
+        depends_on:
+            - bom_negocio.db
+        profiles: ["vs_debug", "vs_sso_debug"]
+
