@@ -3,7 +3,7 @@ using BuildBlocks.Domain.Abstractions;
 using BuildBlocks.Domain.ValueObjects;
 using Order.Domain.Enums;
 
-namespace Order.Domain.Models
+namespace Order.Domain.Entities
 {
     public sealed class OrderEntity : BaseAuditableEntity<Guid>
     {
@@ -14,9 +14,9 @@ namespace Order.Domain.Models
         public decimal Value { get; init; }
 
         public OrderEntity(
-            Address shippingAddress, 
-            Customer customer, 
-            List<OrderItem> items, 
+            Address shippingAddress,
+            Customer customer,
+            List<OrderItem> items,
             decimal value)
         {
             Id = Guid.NewGuid();
@@ -28,15 +28,15 @@ namespace Order.Domain.Models
             LastModifiedAt = null;
         }
 
-        public void UpdateStatus(OrderStatus status) 
+        public void UpdateStatus(OrderStatus status)
         {
-            if(status <= this.Status)
+            if (status <= Status)
             {
                 throw new InvalidOperationException("O Status da ordem não pode retoceder");
             }
 
-            this.Status = status;
-            this.LastModifiedAt = DateTime.UtcNow;
+            Status = status;
+            LastModifiedAt = DateTime.UtcNow;
         }
     }
 }
