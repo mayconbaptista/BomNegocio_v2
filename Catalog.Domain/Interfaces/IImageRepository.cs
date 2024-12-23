@@ -1,7 +1,7 @@
 ﻿
 namespace Catalog.Domain.Interfaces
 {
-    public interface IImageRepository : IWriteRepository<ImageModel> 
+    public interface IImageRepository : IWriteRepository<ImageModel, uint> 
     {
     }
 }

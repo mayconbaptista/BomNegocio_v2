@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BuildBlocks.WebApi\BuildBlocks.WebApi.csproj" />
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\Catalog.InfraData\Catalog.InfraData.csproj" />
-    <ProjectReference Include="..\WebApiBlock\WebApiBlock.csproj" />
   </ItemGroup>
 
   <ItemGroup>

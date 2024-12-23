@@ -1,8 +1,12 @@
 ﻿
+using BuildBlocks.Domain.Abstractions;
+
 namespace Catalog.InfraData.Repositories
 {
-    public abstract class WriteRepository<TModel> (CatalogContext catalogContext) 
-        : ReadRepository<TModel>(catalogContext), IWriteRepository<TModel> where TModel : BaseModel
+    public abstract class WriteRepository<TModel, Tkey> (CatalogContext catalogContext) 
+        : ReadRepository<TModel, Tkey>(catalogContext), IWriteRepository<TModel,Tkey> 
+        where TModel : BaseEntity<Tkey>
+        where Tkey : notnull, IEquatable<Tkey>
     {
         public async Task<TModel> AddAsync(TModel model)
         {

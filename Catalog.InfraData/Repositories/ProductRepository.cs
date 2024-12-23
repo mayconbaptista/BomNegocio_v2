@@ -3,7 +3,7 @@
 namespace Catalog.InfraData.Repositories
 {
     public sealed class ProductRepository(CatalogContext catalogContext)
-        : WriteRepository<ProductModel>(catalogContext), IProductRepository
+        : WriteRepository<ProductModel, uint>(catalogContext), IProductRepository
     {
         public async Task<IEnumerable<ProductModel>> GetByCategoryAsync(uint categoryId)
         {

@@ -13,7 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Auth.WebApi/Auth.WebApi.csproj", "Auth.WebApi/"]
-COPY ["WebApiBlock/WebApiBlock.csproj", "WebApiBlock/"]
+COPY ["BuildBlocks.WebApi/BuildBlocks.WebApi.csproj", "BuildBlocks.WebApi/"]
 RUN dotnet restore "./Auth.WebApi/Auth.WebApi.csproj"
 COPY . .
 WORKDIR "/src/Auth.WebApi"

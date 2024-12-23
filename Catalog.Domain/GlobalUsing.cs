@@ -1,3 +1,5 @@
 ﻿global using Catalog.Domain.Models;
 global using Catalog.Domain.Enums;
+global using BuildBlocks.Domain.Models;
+global using BuildBlocks.Domain;
 global using FluentValidation;

@@ -1,46 +1,47 @@
 
+using BuildBlocks.WebApi.Exceptions.Handlers;
+using BuildBlocks.WebApi.Extensions;
 using System.Text.Json;
-using WebApiBlock.Extensions;
-using WebApiBlock.Middlewares;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-    {
-        builder.AllowAnyOrigin();
-        builder.AllowAnyMethod();
-        builder.AllowAnyHeader();
-
-    });
-});
-
-// Add services to the container.
-InjectionContainer.AddInfrastructure(builder.Services, builder.Configuration);
-
-builder.Services.AddControllers()
-        .AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-        });
-
-        builder.Services.AddMapster();
-
-//MapsterConfig.Configure();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-
-SwaggerExtensionConfig.AddSwagger(builder.Services);
-
-
-AuthorizationExtension.AddAuthorization(builder.Services, builder.Configuration);
-AuthenticationExtension.AddAuthentication(builder.Services, builder.Configuration);
 
 try
 {
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(builder =>
+        {
+            builder.AllowAnyOrigin();
+            builder.AllowAnyMethod();
+            builder.AllowAnyHeader();
+
+        });
+    });
+
+    // Add services to the container.
+    InjectionContainer.AddInfrastructure(builder.Services, builder.Configuration);
+
+    builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+            });
+
+            builder.Services.AddMapster();
+
+    //MapsterConfig.Configure();
+
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+
+    SwaggerExtensionConfig.AddSwagger(builder.Services);
+
+
+    AuthorizationExtension.AddAuthorization(builder.Services, builder.Configuration);
+    AuthenticationExtension.AddAuthentication(builder.Services, builder.Configuration);
+
+    builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
@@ -61,7 +62,7 @@ try
 
     app.UseCors();
 
-    app.UseMiddleware<ExceptionMiddleware>();
+    app.UseExceptionHandler(options => { });
 
     app.UseHttpsRedirection();
 

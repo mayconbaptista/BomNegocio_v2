@@ -1,8 +1,9 @@
-﻿using Catalog.Domain.Validations;
+﻿using BuildBlocks.Domain.Abstractions;
+using Catalog.Domain.Validations;
 
 namespace Catalog.Domain.Models
 {
-    public sealed class ProductModel : BaseModel
+    public sealed class ProductModel : BaseEntity<uint>
     {
         public string Name { get; set; }
         public string SkuCode { get; set; }
@@ -13,7 +14,7 @@ namespace Catalog.Domain.Models
         public CategoryModel Category { get; set; }
         public ICollection<ImageModel> Images { get; set; } = new List<ImageModel>();
 
-        public override void Validate()
+        public void Validate()
         {
             var validator = new ProductValidator();
             var result = validator.Validate(this);

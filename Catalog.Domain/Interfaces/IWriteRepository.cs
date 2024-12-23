@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using BuildBlocks.Domain.Abstractions;
 
 namespace Catalog.Domain.Interfaces
 {
-    public interface IWriteRepository<TModel> : IReadRepository<TModel> where TModel : BaseModel
+    public interface IWriteRepository<TModel, Tkey> : IReadRepository<TModel, Tkey>
+        where TModel : BaseEntity<Tkey>
+        where Tkey : notnull, IEquatable<Tkey>
     {
         public Task<TModel> AddAsync(TModel model);
         public void Update(TModel model);

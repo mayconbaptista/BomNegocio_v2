@@ -1,12 +1,14 @@
-﻿namespace Catalog.Domain.Models
+﻿using BuildBlocks.Domain.Abstractions;
+
+namespace Catalog.Domain.Models
 {
-    public sealed class ImageModel : BaseModel
+    public sealed class ImageModel : BaseEntity<uint>
     {
         public string Path { get; set; }
         public uint ProductId { get; set; }
         public ProductModel Product { get; set; }
 
-        public override void Validate()
+        public void Validate()
         {
             throw new NotImplementedException();
         }

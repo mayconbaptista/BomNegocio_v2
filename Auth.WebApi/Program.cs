@@ -1,13 +1,14 @@
 using Auth.WebApi;
+using BuildBlocks.WebApi.Exceptions.Handlers;
+using BuildBlocks.WebApi.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using WebApiBlock.Extensions;
-
-var builder = WebApplication.CreateBuilder(args);
 
 try
 {
+    var builder = WebApplication.CreateBuilder(args);
+    
     builder.Services.AddCors(options =>
     {
         options.AddDefaultPolicy(builder =>
@@ -34,7 +35,6 @@ try
 
     SwaggerExtension.AddSwagger(builder.Services);
 
-
     AuthorizationExtension.AddAuthorization(builder.Services, builder.Configuration);
     AuthenticationExtension.AddAuthentication(builder.Services, builder.Configuration);
 
@@ -58,6 +58,7 @@ try
         options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
     });
 
+    builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
     var app = builder.Build();
 
@@ -80,7 +81,7 @@ try
 
     app.UseCors();
 
-    app.UseMiddleware<ExceptionMiddleware>();
+    app.UseExceptionHandler(options => { });
 
     app.UseHttpsRedirection();
 

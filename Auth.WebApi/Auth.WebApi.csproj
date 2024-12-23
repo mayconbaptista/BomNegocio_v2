@@ -31,7 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebApiBlock\WebApiBlock.csproj" />
+    <ProjectReference Include="..\BuildBlocks.Domain\BuildBlocks.Domain.csproj" />
+    <ProjectReference Include="..\BuildBlocks.WebApi\BuildBlocks.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

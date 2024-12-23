@@ -1,11 +1,12 @@
 ﻿
-using Catalog.Domain.Interfaces;
-using Catalog.InfraData.Context;
+using BuildBlocks.Domain.Abstractions;
 using System.Linq.Expressions;
 
 namespace Catalog.InfraData.Repositories
 {
-    public abstract class ReadRepository<TModel> (CatalogContext context) : IReadRepository<TModel> where TModel : BaseModel
+    public abstract class ReadRepository<TModel, Tkey> (CatalogContext context) : IReadRepository<TModel, Tkey> 
+        where TModel : BaseEntity<Tkey>
+        where Tkey : notnull, IEquatable<Tkey>
     {
         protected readonly CatalogContext _context = context;
         protected readonly DbSet<TModel> _dbSet = context.Set<TModel>();
@@ -56,14 +57,14 @@ namespace Catalog.InfraData.Repositories
             return await query.ToListAsync();
         }
 
-        public TModel? GetById(int id)
+        public TModel? GetById(Tkey id)
         {
-            return _dbSet.SingleOrDefault(x => x.Id == id);
+            return _dbSet.SingleOrDefault(x => x.Equals(id));
         }
 
-        public async Task<TModel?> GetByIdAsync(int id)
+        public async Task<TModel?> GetByIdAsync(Tkey id)
         {
-            return await _dbSet.SingleOrDefaultAsync(x => x.Id == id);
+            return await _dbSet.SingleOrDefaultAsync(x => x.Equals(id));
         }
     }
 }

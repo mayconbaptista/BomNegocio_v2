@@ -31,3 +31,25 @@ services:
             - bom_negocio.db
         profiles: ["vs_debug", "vs_sso_debug"]
 
+
+    getway.webapi:
+        image: ${DOCKER_REGISTRY-}getwaywebapi
+        hostname: getway
+        container_name: getway
+        build:
+            context: .
+            dockerfile: Getway.WebApi/Dockerfile
+        depends_on:
+            # - catalog.webapi
+            - auth.webapi
+            - bom_negocio.db
+        profiles: ["vs_sso_debug"]
+
+    aux:
+        image: alpine:3.14
+        command: sh -c "apk add --no-cache curl && while true; do sleep 30; done"
+        hostname: aux
+        container_name: aux
+        stdin_open: true
+        tty: true
+        profiles: ["vs_sso_debug"]
