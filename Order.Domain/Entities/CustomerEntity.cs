@@ -1,18 +1,25 @@
-﻿
-using BuildBlocks.Domain.Abstractions;
+﻿using BuildBlocks.Domain.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Order.Domain.Entities
 {
-    public sealed class CustomerEntity : BaseEntity<Guid>
+    public class CustomerEntity : BaseEntity<Guid>
     {
-        public string Email { get; init; }
-        public string Name { get; init; }
+        public string Name { get; private set; }
+        public string Email { get; private set; }
 
-        public CustomerEntity(Guid id, string email, string name)
+        public static CustomerEntity Create(Guid id, string name, string email)
         {
-            Id = id;
-            Email = email;
-            Name = name;
+            return new CustomerEntity
+            {
+                Id = id,
+                Name = name,
+                Email = email
+            };
         }
     }
 }

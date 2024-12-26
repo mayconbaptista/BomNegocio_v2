@@ -7,23 +7,32 @@ namespace BuildInBlocks.Messaging.Events
     public record CartCheckoutEvent : IntegrationEvent
     {
         public Guid CustomerId { get; init; }
-        public string UserName { get; init; }
+        public string CustomerName { get; init; }
+        public string CustomerEmail { get; init; }
 
-        public string City { get; init; }
-        public string Street { get; init; }
-        public string State { get; init; }
-        public string Country { get; init; }
-        public string ZipCode { get; init; }
+        public string ShippingAddressName { get; init; }
+        public string ShippingAddressCity { get; init; }
+        public string ShippingAddressStreet { get; init; }
+        public string ShippingAddressState { get; init; }
+        public string ShippingAddressCountry { get; init; }
+        public string ShippingAddressZipCode { get; init; }
 
-        public string CardNumber { get; init; }
-        public string CardHolderName { get; init; }
-        public string CardExpiration { get; init; }
-        public string CardSecurityNumber { get; init; }
-        public int CardTypeId { get; init; }
+        public string BillingAddressName { get; init; }
+        public string BillingAddressCity { get; init; }
+        public string BillingAddressStreet { get; init; }
+        public string BillingAddressState { get; init; }
+        public string BillingAddressCountry { get; init; }
+        public string BillingAddressZipCode { get; init; }
 
-        public string Buyer { get; init; }
-        public decimal Total { get; init; }
-        public string Currency { get; init; }
-        public List<CartItem> Items { get; init; }
+        //public string CardNumber { get; init; }
+        //public string CardHolderName { get; init; }
+        //public string CardExpiration { get; init; }
+        //public string CardCvv { get; init; }
+        //public int CardTypeId { get; init; }
+
+        //public string Buyer { get; init; }
+        //public decimal Total { get; init; }
+        //public string Currency { get; init; }
+        public List<CartItem> OrderItems { get; init; }
     }
 }

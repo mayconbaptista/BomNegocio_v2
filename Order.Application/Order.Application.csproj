@@ -7,13 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BuildInBlocks.Messaging\BuildInBlocks.Messaging.csproj" />
     <ProjectReference Include="..\Order.Domain\Order.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Order\Comands\" />
-    <Folder Include="CQRS\Order\Handlers\" />
     <Folder Include="CQRS\Order\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Microsoft.FeatureManagement" Version="4.0.0" />
   </ItemGroup>
 
 </Project>

@@ -17,7 +17,7 @@ services:
         image: postgres:16.4
         hostname: bom_negocio_db
         container_name: bn_db
-        profiles: ["vs_debug", "vs_sso_debug"]
+        profiles: ["vs_debug", "vs_sso_debug", "message_broker"]
 
 
     auth.webapi:
@@ -40,10 +40,19 @@ services:
             context: .
             dockerfile: Getway.WebApi/Dockerfile
         depends_on:
-            # - catalog.webapi
+            #- catalog.webapi
             - auth.webapi
             - bom_negocio.db
         profiles: ["vs_sso_debug"]
+
+    message.broker:
+        image: rabbitmq:4.0-management
+        hostname: message-mq
+        container_name: masstransit-mq
+        depends_on:
+            - bom_negocio.db
+            #- auth.webapi
+        profiles: ["vs_debug", "message_broker"]
 
     aux:
         image: alpine:3.14
@@ -53,3 +62,14 @@ services:
         stdin_open: true
         tty: true
         profiles: ["vs_sso_debug"]
+
+    order.webapi:
+        image: ${DOCKER_REGISTRY-}orderwebapi
+        build:
+            context: .
+            dockerfile: Order.WebApi/Dockerfile
+        depends_on:
+            - bom_negocio.db
+            - message.broker
+        profiles: ["vs_debug", "message_broker"] 
+

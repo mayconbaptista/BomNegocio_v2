@@ -58,5 +58,30 @@ services:
         volumes:
             - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
             - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+    message.broker:
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        restart: always
+
+    order.webapi:
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+        ports:
+            - "8888:8080"
+            - "8881:8081"
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+            #- ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+            - ~/.aspnet/https:/https:ro
+
+
+
 # volumes:
 #    bom_negocio.db_data:

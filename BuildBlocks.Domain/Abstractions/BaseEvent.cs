@@ -9,6 +9,6 @@ namespace BuildBlocks.Domain.Abstractions
 
         public DateTimeOffset OccurredOn { get; } = DateTimeOffset.UtcNow;
 
-        public string EventName => GetType().Name;
+        public string EventType => GetType().AssemblyQualifiedName!;
     }
 }

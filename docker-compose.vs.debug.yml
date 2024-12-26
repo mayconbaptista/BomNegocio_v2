@@ -3,23 +3,30 @@
 version: '3.4'
 
 services:
-  catalog.webapi:
-    labels:
-      com.microsoft.visualstudio.debuggee.program: "dotnet"
-      com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Catalog.WebApi.dll\""
-      com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
-      com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
+    catalog.webapi:
+        labels:
+            com.microsoft.visualstudio.debuggee.program: "dotnet"
+            com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Catalog.WebApi.dll\""
+            com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
+            com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
 
-  auth.webapi:
-    labels:
-      com.microsoft.visualstudio.debuggee.program: "dotnet"
-      com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Auth.WebApi.dll\""
-      com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
-      com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
+    auth.webapi:
+        labels:
+            com.microsoft.visualstudio.debuggee.program: "dotnet"
+            com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Auth.WebApi.dll\""
+            com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
+            com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
 
-  getway.webapi:
-    labels:
-      com.microsoft.visualstudio.debuggee.program: "dotnet"
-      com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Getway.WebApi.dll\""
-      com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
-      com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
+    getway.webapi:
+        labels:
+            com.microsoft.visualstudio.debuggee.program: "dotnet"
+            com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Getway.WebApi.dll\""
+            com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
+            com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
+  
+    order.webapi:
+        labels:
+            com.microsoft.visualstudio.debuggee.program: "dotnet"
+            com.microsoft.visualstudio.debuggee.arguments: "\"/app/bin/Debug/net8.0/Order.WebApi.dll\""
+            com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
+            com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""

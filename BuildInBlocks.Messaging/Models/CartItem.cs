@@ -1,11 +1,10 @@
 ﻿
 namespace BuildInBlocks.Messaging.Models
 {
-    public record CartCheckoutItem
+    public record CartItem
     {
-        public string ProductCode { get; init; }
-        public string ProductName { get; init; }
-        public decimal PriceUni { get; init; }
+        public string ProductId { get; init; }
+        public decimal UnitPrice { get; init; }
         public int Quantity { get; init; }
     }
 }

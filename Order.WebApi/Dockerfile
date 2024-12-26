@@ -13,6 +13,12 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Order.WebApi/Order.WebApi.csproj", "Order.WebApi/"]
+COPY ["BuildBlocks.WebApi/BuildBlocks.WebApi.csproj", "BuildBlocks.WebApi/"]
+COPY ["Order.Application/Order.Application.csproj", "Order.Application/"]
+COPY ["BuildInBlocks.Messaging/BuildInBlocks.Messaging.csproj", "BuildInBlocks.Messaging/"]
+COPY ["BuildBlocks.Domain/BuildBlocks.Domain.csproj", "BuildBlocks.Domain/"]
+COPY ["Order.Domain/Order.Domain.csproj", "Order.Domain/"]
+COPY ["Order.Infrastructure/Order.Infrastructure.csproj", "Order.Infrastructure/"]
 RUN dotnet restore "./Order.WebApi/Order.WebApi.csproj"
 COPY . .
 WORKDIR "/src/Order.WebApi"

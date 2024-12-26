@@ -2,11 +2,11 @@
 
 namespace Order.Domain.Events
 {
-    public class OrderUpdateEvent : BaseEvent
+    public class OrderStatusChangedEvent : BaseEvent
     {
         public Guid OrderId { get; private set; }
         public string OrderStatus { get; private set; }
-        public OrderUpdateEvent(Guid orderId, string orderStatus)
+        public OrderStatusChangedEvent(Guid orderId, string orderStatus)
         {
             OrderId = orderId;
             OrderStatus = orderStatus;

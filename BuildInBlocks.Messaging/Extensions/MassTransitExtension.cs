@@ -21,10 +21,10 @@ namespace BuildInBlocks.Messaging.Extensions
 
                 config.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(new Uri(configuration["RabbitMq:Host"]!), h =>
+                    cfg.Host(new Uri(configuration["MessageBroker:Host"]!), h =>
                     {
-                        h.Username(configuration["RabbitMq:Username"]!);
-                        h.Password(configuration["RabbitMq:Password"]!);
+                        h.Username(configuration["MessageBroker:Username"]!);
+                        h.Password(configuration["MessageBroker:Password"]!);
                     });
 
                     cfg.ConfigureEndpoints(context);
