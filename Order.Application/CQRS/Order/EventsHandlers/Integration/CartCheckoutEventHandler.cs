@@ -1,5 +1,6 @@
 ﻿using BuildBlocks.Domain.ValueObjects;
 using BuildInBlocks.Messaging.Events;
+using Mapster;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -18,42 +19,19 @@ namespace Order.Application.CQRS.Order.EventsHandlers.Integration
 
             var command = this.MapToCreateOrderCommand(consumeContext.Message);
 
-            await this._sender.Send(command);
+            //await this._sender.Send(command);
+            await Task.Delay(1000);
         }
 
         public CreateOrderCommand MapToCreateOrderCommand(CartCheckoutEvent cartCheckoutEvent)
         {
-            var shippingAddress = new AddressDto(
-                cartCheckoutEvent.ShippingAddressName,
-                cartCheckoutEvent.ShippingAddressStreet,
-                cartCheckoutEvent.ShippingAddressCity,
-                cartCheckoutEvent.ShippingAddressState,
-                cartCheckoutEvent.ShippingAddressCountry,
-                cartCheckoutEvent.ShippingAddressZipCode);
-
-            var billingAddress = new AddressDto(
-                cartCheckoutEvent.BillingAddressName,
-                cartCheckoutEvent.BillingAddressStreet,
-                cartCheckoutEvent.BillingAddressCity,
-                cartCheckoutEvent.BillingAddressState,
-                cartCheckoutEvent.BillingAddressCountry,
-                cartCheckoutEvent.BillingAddressZipCode);
-
-
-            var customer = new CustomerDto(
-                cartCheckoutEvent.CustomerId,
-                cartCheckoutEvent.CustomerName,
-                cartCheckoutEvent.CustomerEmail);
-
-            var createOrderCommand = new CreateOrderCommand
+            return new CreateOrderCommand
             {
-                ShippingAdress = shippingAddress,
-                BillingAdress = billingAddress,
-                Customer = customer,
-                OrderItems = cartCheckoutEvent.OrderItems.Select(i => new OrderItemDto(i.ProductId, i.ProductName, i.PriceUni, i.Quantity)).ToList()
+                BillingAdress = cartCheckoutEvent.BillingAddress,
+                ShippingAdress = cartCheckoutEvent.ShippingAddress,
+                Customer = cartCheckoutEvent.Customer,
+                OrderItems = cartCheckoutEvent.Itens.Select(x => new OrderItemDto(x.ProductId, x.Price, x.Quantity)).ToList()
             };
-
-            return createOrderCommand;
         }
     }
 }

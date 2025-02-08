@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using Order.Domain.Interfaces;
 using Order.Domain.Entities;
 using Order.Domain.ValueObjects;
+using BuildInBlocks.Messaging.Dtos;
+using BuildBlocks.Domain.Abstractions.CQRS;
 
 namespace Order.Application.CQRS.Order.Commands;
 
@@ -13,7 +15,7 @@ public sealed record CreateOrderCommand : ICommand<Guid>
     public AddressDto ShippingAdress { get; init; }
     public AddressDto BillingAdress { get; init; }
     public CustomerDto Customer { get; init; }
-    public List<OrderItemDto> OrderItems { get; init; }
+    public List<OrderItemDto> OrderItems { get; init; } = new();
 }
 
 public sealed class CreateOrderCommandHandler
@@ -26,6 +28,11 @@ public sealed class CreateOrderCommandHandler
     public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var entt = await this._unitOfWork.OrderRepository.AddAsync(this.CreateNewOrder(request));
+
+        foreach (var item in request.OrderItems)
+        {
+            entt.AddItem(item.ProductId, item.Quantity, item.UnitPrice);
+        }
 
         await this._unitOfWork.CommitAsync(cancellationToken);
 
@@ -40,6 +47,6 @@ public sealed class CreateOrderCommandHandler
 
         var items = request.OrderItems.Adapt<List<OrderItemEntity>>();
 
-        return OrderEntity.Create(request.Customer.Id, shippingAddress, billingAddress, items);
+        return OrderEntity.Create(request.Customer.Id, shippingAddress, billingAddress);
     }
 }

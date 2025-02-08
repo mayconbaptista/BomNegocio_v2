@@ -1,4 +1,4 @@
-﻿using Auth.WebApi.Models;
+﻿using BuildBlocks.Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -36,7 +36,7 @@ namespace Auth.WebApi.Services.Implements
                     await _userManager.UpdateAsync(user);
                 }
 
-                throw new BusinesException(HttpStatusCode.BadRequest, "Usuário ou senha inválidos");
+                throw new BadRequestException("Usuário não encontrado ou credenciais inválidos");
             }
 
             var claims = new List<Claim>
@@ -74,7 +74,7 @@ namespace Auth.WebApi.Services.Implements
             var userExists = await _userManager.FindByEmailAsync(userDto.Email);
 
             if (userExists != null)
-                throw new BusinesException(HttpStatusCode.BadRequest, "Usuário já cadastrado");
+                throw new BadRequestException("Usuário já cadastrado");
 
             var user = new UserModel
             {
@@ -92,7 +92,7 @@ namespace Auth.WebApi.Services.Implements
             var result = await _userManager.CreateAsync(user, userDto.Email + userDto.Password);
 
             if (!result.Succeeded)
-                throw new BusinesException(HttpStatusCode.BadRequest, result.ToString(),result.Errors.Select(e => e.Description).ToList());
+                throw new Exception($"Erro ao criar usuário: {result.Errors.Select(x => x.Description).ToString()}");
 
             return user.Id;
         }

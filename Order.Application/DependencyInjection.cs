@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using BuildInBlocks.Messaging.Extensions;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
-using Microsoft.FeatureManagement;
 
 namespace Order.Application
 {
@@ -16,8 +15,8 @@ namespace Order.Application
                 config.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
             });
 
-            services.AddFeatureManagement(configuration);
-            services.AddMassTransit(configuration, Assembly.GetExecutingAssembly());
+            services.AddMessageBroker(configuration, Assembly.GetExecutingAssembly());
+            services.AddMapsterConfig();
 
             return services;
         }

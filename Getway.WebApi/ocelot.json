@@ -1,14 +1,53 @@
 {
   "Routes": [
     {
-      "UpstreamPathTemplate": "/sso",
-      "UpstreamHttpMethod": [ "Get" ],
-      "DownstreamPathTemplate": "/api/Auth",
+      "UpstreamPathTemplate": "/api/Auth{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post" ],
+      "DownstreamPathTemplate": "/api/Auth{everything}",
       "DownstreamScheme": "https",
       "DangerousAcceptAnyServerCertificateValidator": true,
       "DownstreamHostAndPorts": [
         {
-          "Host": "auth",
+          "Host": "auth.api",
+          "Port": 8081
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/Cart{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/Cart{everything}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "cart.api",
+          "Port": 8081
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/Catalog{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/Catalog{everything}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "catalog.api",
+          "Port": 8081
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/api/Order{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/Order{everything}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "order.api",
           "Port": 8081
         }
       ]

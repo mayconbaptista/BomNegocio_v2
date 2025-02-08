@@ -10,18 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Carter" Version="8.2.1" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Data\" />
-    <Folder Include="NovaPasta\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BuildBlocks.Domain\BuildBlocks.Domain.csproj" />
+    <ProjectReference Include="..\BuildBlocks.WebApi\BuildBlocks.WebApi.csproj" />
+    <ProjectReference Include="..\BuildInBlocks.Messaging\BuildInBlocks.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

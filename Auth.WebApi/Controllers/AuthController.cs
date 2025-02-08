@@ -39,7 +39,7 @@ namespace Auth.WebApi.Controllers
 
         [HttpGet("check")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Chech()
+        public IActionResult Chech()
         {
             return Ok(new {message = "Checked"});
         }

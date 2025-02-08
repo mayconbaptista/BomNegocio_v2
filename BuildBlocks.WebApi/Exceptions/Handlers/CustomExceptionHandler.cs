@@ -1,9 +1,7 @@
-﻿
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
 namespace BuildBlocks.WebApi.Exceptions.Handlers
@@ -15,20 +13,31 @@ namespace BuildBlocks.WebApi.Exceptions.Handlers
             logger.LogError(exception, exception.Message, DateTime.UtcNow);
 
 
-
             (string detail, string title, int statusCode)  details = exception switch
             {
-                BusinesException businessException => 
-                    (
-                        businessException.Message,
-                        businessException.GetType().Name, 
-                        (int)businessException.Code
-                    ),
-                ValidationException validationException => 
+                System.ComponentModel.DataAnnotations.ValidationException validationException => 
                     (
                         validationException.Message,
                         validationException.GetType().Name,
                         StatusCodes.Status422UnprocessableEntity
+                    ),
+                FluentValidation.ValidationException fluentValidationException =>
+                (
+                    fluentValidationException.Message,
+                    fluentValidationException.GetType().Name,
+                    StatusCodes.Status422UnprocessableEntity
+                ),
+                BadHttpRequestException badHtpReqException =>
+                    (
+                        badHtpReqException.Message,
+                        badHtpReqException.GetType().Name,
+                        StatusCodes.Status400BadRequest
+                    ),
+                NotFoundException notFoundException =>
+                    (
+                        notFoundException.Message,
+                        notFoundException.GetType().Name,
+                        StatusCodes.Status404NotFound
                     ),
                 _ => 
                     (
@@ -49,6 +58,15 @@ namespace BuildBlocks.WebApi.Exceptions.Handlers
             problemDetails.Extensions.Add("traceId", httpContext.TraceIdentifier);
 
             httpContext.Response.StatusCode = problemDetails.Status.Value;
+
+            if (exception is System.ComponentModel.DataAnnotations.ValidationException dataAnnotationValidationException)
+            {
+                problemDetails.Extensions.Add("ValidationErrors", dataAnnotationValidationException.ValidationResult);
+            }
+            else if(exception is FluentValidation.ValidationException domainValidationException)
+            {
+                problemDetails.Extensions.Add("ValidationErrors", domainValidationException.Errors);
+            }
 
             var jsonProperties = new JsonSerializerOptions
             {

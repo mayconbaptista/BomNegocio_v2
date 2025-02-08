@@ -7,14 +7,15 @@ namespace Order.Domain.Entities
     {
         public Guid ProductId { get; private set; }
         public Guid OrderId { get; private set; }
-        public int Quantity { get; private set; }
+        public uint Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
 
-        public static OrderItemEntity Create (Guid productId, int quantity, decimal unitPrice)
+        public static OrderItemEntity Create (Guid productId,Guid orderId, uint quantity, decimal unitPrice)
         {
             return new OrderItemEntity
             {
                 ProductId = productId,
+                OrderId = orderId,
                 Quantity = quantity,
                 UnitPrice = unitPrice
             };

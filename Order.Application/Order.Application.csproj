@@ -12,12 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Order\Queries\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Mapster" Version="7.4.0" />
-    <PackageReference Include="Microsoft.FeatureManagement" Version="4.0.0" />
   </ItemGroup>
 
 </Project>

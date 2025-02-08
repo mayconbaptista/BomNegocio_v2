@@ -1,4 +1,5 @@
 ﻿using BuildBlocks.Domain.ValueObjects;
+using BuildInBlocks.Messaging.Dtos;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using Order.Domain.Entities;
@@ -58,7 +59,6 @@ namespace Order.Application.Dtos
             TypeAdapterConfig<OrderItemEntity, OrderItemDto>
                 .NewConfig()
                 .Map(dest => dest.ProductId, src => src.ProductId)
-                .Map(dest => dest.OrderId, src => src.OrderId)
                 .Map(dest => dest.UnitPrice, src => src.UnitPrice)
                 .Map(dest => dest.Quantity, src => src.Quantity);
 

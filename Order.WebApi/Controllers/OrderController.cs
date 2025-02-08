@@ -27,5 +27,12 @@ namespace Order.WebApi.Controllers
         {
             return Ok(new { message =  "Message" });
         }
+
+        [HttpGet("list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult list()
+        {
+            return Ok(new { message = "List" });
+        }
     }
 }

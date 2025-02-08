@@ -32,8 +32,7 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
     builder.Services.AddEndpointsApiExplorer();
-
-    SwaggerExtension.AddSwagger(builder.Services);
+    builder.Services.AddSwagger(typeof(Program).Assembly);
 
     AuthorizationExtension.AddAuthorization(builder.Services, builder.Configuration);
     AuthenticationExtension.AddAuthentication(builder.Services, builder.Configuration);
@@ -58,6 +57,7 @@ try
         options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
     });
 
+    // responsabilidades transversais
     builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
     var app = builder.Build();

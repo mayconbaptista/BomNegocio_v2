@@ -14,17 +14,10 @@
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BuildBlocks.WebApi\BuildBlocks.WebApi.csproj" />
-    <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
-    <ProjectReference Include="..\Catalog.InfraData\Catalog.InfraData.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Response\" />
   </ItemGroup>
 
 </Project>

@@ -15,6 +15,7 @@ namespace Order.Infrastructure
                 ?? throw new ArgumentNullException("DbConnection is not found in the configuration file.");
 
             services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
+            services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
 
             services.AddDbContext<OrderContext>((sp, options) =>
             {

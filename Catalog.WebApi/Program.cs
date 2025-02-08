@@ -27,7 +27,7 @@ try
                 options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
             });
 
-            builder.Services.AddMapster();
+    builder.Services.AddMapster();
 
     //MapsterConfig.Configure();
 

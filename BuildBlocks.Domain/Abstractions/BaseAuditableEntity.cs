@@ -4,8 +4,8 @@ namespace BuildBlocks.Domain.Abstractions
 {
     public abstract class BaseAuditableEntity : BaseEntity<Guid>
     {
-        public DateTimeOffset CreateAt { get; protected init; }
-        public DateTimeOffset? LastModifiedAt { get; protected set; }
+        public DateTimeOffset CreateAt { get; set; }
+        public DateTimeOffset? LastModifiedAt { get; set; }
 
 
         private readonly List<BaseEvent> _domainEvents = new();

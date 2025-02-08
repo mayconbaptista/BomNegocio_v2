@@ -1,0 +1,12 @@
+global using BuildBlocks.Domain.Abstractions.CQRS;
+global using Cart.WebApi.Data.Repository.Interfaces;
+global using Cart.WebApi.Data.Repository.implements;
+global using Cart.WebApi.Entities;
+global using MediatR;
+global using Carter;
+global using Mapster;
+global using System.ComponentModel.DataAnnotations;
+global using BuildBlocks.WebApi.Exceptions.Handlers;
+global using BuildBlocks.WebApi.Filters;
+global using BuildBlocks.WebApi.Extensions;
+global using Cart.WebApi.Data;

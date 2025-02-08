@@ -14,6 +14,8 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Auth.WebApi/Auth.WebApi.csproj", "Auth.WebApi/"]
 COPY ["BuildBlocks.WebApi/BuildBlocks.WebApi.csproj", "BuildBlocks.WebApi/"]
+COPY ["BuildInBlocks.CQRS/BuildInBlocks.CQRS.csproj", "BuildInBlocks.CQRS/"]
+COPY ["BuildBlocks.Domain/BuildBlocks.Domain.csproj", "BuildBlocks.Domain/"]
 RUN dotnet restore "./Auth.WebApi/Auth.WebApi.csproj"
 COPY . .
 WORKDIR "/src/Auth.WebApi"

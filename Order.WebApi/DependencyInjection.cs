@@ -7,7 +7,7 @@ namespace Order.WebApi
 
         public static IServiceCollection AddApiServices (this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddExceptionHandler<CustomExceptionHandler>();
+            //services.AddExceptionHandler<CustomExceptionHandler>();
 
             return services;
         }

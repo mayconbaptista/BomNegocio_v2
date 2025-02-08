@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option csharp_namespace = "Catalog.Api";
+
+package product;
+
+// The greeting service definition.
+service ProductGRPC {
+    // Sends a greeting
+    rpc GetProducts(stream ProductRequest) returns (stream ProductReply);
+}
+
+// The request message containing the user's name.
+message ProductRequest {
+    string Id = 1;
+    uint32 Quantity = 2;
+}
+
+message ProductReply {
+    string Id = 1;
+    string SkuCode = 2;
+    float Price = 3;
+    uint32 Quantity = 4;
+}

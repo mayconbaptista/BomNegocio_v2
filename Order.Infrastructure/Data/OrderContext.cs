@@ -4,12 +4,8 @@ using Order.Domain.Entities;
 
 namespace Order.Infrastructure.Data
 {
-    public class OrderContext : DbContext
+    public class OrderContext(DbContextOptions<OrderContext> options) : DbContext(options)
     {
-        public OrderContext(DbContextOptions<OrderContext> options) : base(options)
-        {
-        }
-
         public DbSet<OrderEntity> Orders { get; set; }
         public DbSet<OrderItemEntity> OrderItems { get; set; }
         public DbSet<CustomerEntity> Customers { get; set; }

@@ -12,11 +12,8 @@ namespace Order.Domain.Entities
         public Address ShippingAddress { get; private set; } = default!;
         public Address BillingAddress { get; private set; } = default!;
         public OrderStatus Status { get; private set; } = OrderStatus.Peding;
-        public decimal TotalPrice
-        {
-            get => OrderItems.Sum(i => i.UnitPrice * i.Quantity);
-            private set { }
-        }
+        public decimal TotalPrice => OrderItems.Sum(i => i.UnitPrice * i.Quantity);
+
 
         public IReadOnlyList<OrderItemEntity> OrderItems => _OrderItems.AsReadOnly();
         private List<OrderItemEntity> _OrderItems { get; init; }
@@ -24,17 +21,13 @@ namespace Order.Domain.Entities
         public static OrderEntity Create(
             Guid customerId,
             Address shippingAddress,
-            Address billingAddress,
-            List<OrderItemEntity> items)
+            Address billingAddress)
         {
             var order = new OrderEntity
             {
                 CustomerId = customerId,
                 ShippingAddress = shippingAddress,
-                BillingAddress = billingAddress,
-                _OrderItems = items,
-                CreateAt = DateTime.UtcNow,
-                LastModifiedAt = null
+                BillingAddress = billingAddress
             };
 
             order.AddDomainEvent(new OrderCreateEvent(order));
@@ -50,9 +43,20 @@ namespace Order.Domain.Entities
             }
 
             Status = status;
-            LastModifiedAt = DateTime.UtcNow;
 
             this.AddDomainEvent(new OrderStatusChangedEvent(this.Id, this.Status.ToString()));
+        }
+
+        public void AddItem (Guid productId, uint quantity, decimal unitPrice)
+        {
+            if(Status != OrderStatus.Peding)
+            {
+                throw new InvalidOperationException("Não é possível adicionar itens a um pedido que não está pendente");
+            }
+
+            var item = OrderItemEntity.Create(productId,this.Id, quantity, unitPrice);
+
+            _OrderItems.Add(item);
         }
     }
 }

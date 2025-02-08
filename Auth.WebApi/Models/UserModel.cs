@@ -5,6 +5,6 @@ namespace Auth.WebApi.Models
 {
     public class UserModel : IdentityUser
     {
-        public IEnumerable<Address> Addresses { get; set; } = [];
+
     }
 }
