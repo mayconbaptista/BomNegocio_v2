@@ -28,7 +28,7 @@ Descrição:
 
 Gerencia as ordem de compra geradas pelo usuário.
 
-padrões:
+padrões de projeto:
 - REST
 - JWT
 - OAuth2
@@ -40,4 +40,7 @@ padrões:
 - Domain Driven Design :
   - Referências: 
     - [Objetos de Valor EF](https://www.youtube.com/watch?v=3EBb8zGJCP4)
-### Pagamento ?
+### Catalogo
+
+gerencia os produtos em stock
+

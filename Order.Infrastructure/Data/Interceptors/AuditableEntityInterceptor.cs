@@ -39,7 +39,6 @@ namespace Order.Infrastructure.Data.Interceptors
                         break;
 
                     case EntityState.Modified:
-                        entity.Entity.CreateAt = now;
                         entity.Entity.LastModifiedAt = now;
                         break;
                 }

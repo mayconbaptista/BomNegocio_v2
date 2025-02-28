@@ -14,12 +14,17 @@ namespace Order.Infrastructure
             var connection = configuration.GetConnectionString("DbConnection")
                 ?? throw new ArgumentNullException("DbConnection is not found in the configuration file.");
 
+            services.AddScoped<DispatchDomainEventsInterceptor>();
+            services.AddScoped<AuditableEntityInterceptor>();
             services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
             services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
 
             services.AddDbContext<OrderContext>((sp, options) =>
             {
-                options.AddInterceptors(sp.GetRequiredService<ISaveChangesInterceptor>());
+                var interceptors = sp.GetServices<ISaveChangesInterceptor>().ToArray();
+
+                options.AddInterceptors(interceptors);
+
                 options.UseNpgsql(connection, opt =>
                 {
                     opt.SetPostgresVersion(new Version(16, 4));

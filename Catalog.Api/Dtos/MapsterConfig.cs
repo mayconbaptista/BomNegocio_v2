@@ -14,6 +14,7 @@ namespace Catalog.Api.Dtos
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.Price, src => src.Price)
+                .Map(dest => dest.Quantity, src => src.Quantity)
                 .Map(dest => dest.CategoryId, src => src.CategoryId);
 
             TypeAdapterConfig<ProductEntity, ProductDetailsDto>

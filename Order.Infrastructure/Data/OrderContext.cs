@@ -8,8 +8,6 @@ namespace Order.Infrastructure.Data
     {
         public DbSet<OrderEntity> Orders { get; set; }
         public DbSet<OrderItemEntity> OrderItems { get; set; }
-        public DbSet<CustomerEntity> Customers { get; set; }
-        public DbSet<ProductEntity> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

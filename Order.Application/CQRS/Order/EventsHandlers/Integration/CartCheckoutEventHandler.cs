@@ -10,17 +10,22 @@ namespace Order.Application.CQRS.Order.EventsHandlers.Integration
     public class CartCheckoutEventHandler(ISender sender, ILogger<CartCheckoutEventHandler> logger)
         : IConsumer<CartCheckoutEvent>
     {
-        public readonly ISender _sender = sender;
-        public readonly ILogger<CartCheckoutEventHandler> _logger = logger;
 
         public async Task Consume(ConsumeContext<CartCheckoutEvent> consumeContext)
         {
-            this._logger.LogInformation("IntegrationEvent consumed: {0}", consumeContext.Message.GetType().Name);
+            try
+            {
+                logger.LogInformation("IntegrationEvent consumed: {0}", consumeContext.Message.GetType().Name);
 
-            var command = this.MapToCreateOrderCommand(consumeContext.Message);
+                var command = this.MapToCreateOrderCommand(consumeContext.Message);
 
-            //await this._sender.Send(command);
-            await Task.Delay(1000);
+                await sender.Send(command);
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, $"Error:{ex.Message}");
+                throw;
+            }
         }
 
         public CreateOrderCommand MapToCreateOrderCommand(CartCheckoutEvent cartCheckoutEvent)

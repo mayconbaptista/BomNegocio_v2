@@ -1,6 +1,5 @@
 ﻿using Catalog.Api.Data.Interfaces;
 using Grpc.Core;
-using System.Runtime.CompilerServices;
 
 namespace Catalog.Api.Services
 {
@@ -14,31 +13,49 @@ namespace Catalog.Api.Services
             IServerStreamWriter<ProductReply> responseStream,
             ServerCallContext context)
         {
-            _logger.LogInformation("GetProducts method called");
-            var list = new List<Guid>();
-
-            await foreach (var request in requestStream.ReadAllAsync())
+            try
             {
-                list.Add(Guid.Parse(request.Id));
-            }
+                _logger.LogInformation("GetProducts method GRPC called");
 
-            var products = await _unitOfWork.IProductRepository.GetRange(list);
+                var listIds = new List<Guid>();
 
-
-            foreach (var product in products)
-            {
-                var element = new ProductReply
+                await foreach (var item in requestStream.ReadAllAsync())
                 {
-                    Id = product.Id.ToString(),
-                    SkuCode = product.SkuCode,
-                    Price = (float) product.Price,
-                    Quantity = product.Quantity,
+                    if(!Guid.TryParse(item.Id, out var productId))
+                    {
+                        throw new RpcException(new Status(StatusCode.InvalidArgument, "O identificador do produto é inválido"));
+                    }
+
+                    listIds.Add(productId);
                 };
 
-                await responseStream.WriteAsync(element);
-            }
+                var products = await _unitOfWork.IProductRepository.GetRange(listIds);
 
-            await Task.CompletedTask;
+                foreach (var product in products)
+                {
+                    var element = new ProductReply
+                    {
+                        Id = product.Id.ToString(),
+                        SkuCode = product.SkuCode,
+                        Price = (float)product.Price,
+                        Quantity = product.Quantity,
+                    };
+
+                    await responseStream.WriteAsync(element);
+                }
+
+                await Task.CompletedTask;
+            }
+            catch (RpcException ex)
+            {
+                _logger.LogError(ex, "RpcException");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetProducts method GRPC failed");
+                throw;
+            }
         }
     }
 }

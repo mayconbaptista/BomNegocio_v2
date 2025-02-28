@@ -9,7 +9,7 @@ namespace Order.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderItemEntity> builder)
         {
-            builder.ToTable("Order_Item");
+            builder.ToTable("order_item");
             builder.HasKey(e => new {e.OrderId, e.ProductId});
 
             builder.Ignore(e => e.Id);
@@ -29,11 +29,6 @@ namespace Order.Infrastructure.Data.Configurations
             builder.Property(e => e.Quantity)
                 .HasColumnName("quantity")
                 .IsRequired(true);
-
-            builder.HasOne<ProductEntity>()
-                .WithMany()
-                .HasForeignKey(e => e.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne<OrderEntity>()
                 .WithMany(e => e.OrderItems)

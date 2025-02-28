@@ -11,12 +11,13 @@ namespace Order.Domain.Entities
         public Guid CustomerId { get; private set; }
         public Address ShippingAddress { get; private set; } = default!;
         public Address BillingAddress { get; private set; } = default!;
-        public OrderStatus Status { get; private set; } = OrderStatus.Peding;
+        public OrderStatus Status { get; private set; } = default;
         public decimal TotalPrice => OrderItems.Sum(i => i.UnitPrice * i.Quantity);
 
 
         public IReadOnlyList<OrderItemEntity> OrderItems => _OrderItems.AsReadOnly();
-        private List<OrderItemEntity> _OrderItems { get; init; }
+
+        private readonly List<OrderItemEntity> _OrderItems = new();
 
         public static OrderEntity Create(
             Guid customerId,
@@ -25,6 +26,7 @@ namespace Order.Domain.Entities
         {
             var order = new OrderEntity
             {
+                Status = OrderStatus.Pending,
                 CustomerId = customerId,
                 ShippingAddress = shippingAddress,
                 BillingAddress = billingAddress
@@ -44,12 +46,12 @@ namespace Order.Domain.Entities
 
             Status = status;
 
-            this.AddDomainEvent(new OrderStatusChangedEvent(this.Id, this.Status.ToString()));
+            this.AddDomainEvent(new OrderStatusChangedEvent(this));
         }
 
         public void AddItem (Guid productId, uint quantity, decimal unitPrice)
         {
-            if(Status != OrderStatus.Peding)
+            if(Status != OrderStatus.Pending)
             {
                 throw new InvalidOperationException("Não é possível adicionar itens a um pedido que não está pendente");
             }

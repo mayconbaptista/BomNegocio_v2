@@ -2,6 +2,7 @@
 using BuildBlocks.WebApi.Behaviors;
 using BuildInBlocks.Messaging.Extensions;
 using Cart.WebApi;
+using Catalog.Api;
 
 try
 {
@@ -37,6 +38,14 @@ try
     // responsabilidades transversais
     builder.Services.AddAuthorization(builder.Configuration);
     builder.Services.AddAuthentication(builder.Configuration);
+
+    builder.Services.AddGrpcClient<ProductGRPC.ProductGRPCClient>(options =>
+    {
+        options.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
+    }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    });
 
     builder.Services.AddMessageBroker(builder.Configuration);
 

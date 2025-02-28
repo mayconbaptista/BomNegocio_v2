@@ -22,7 +22,7 @@ namespace Order.Infrastructure.Data.Configurations
                 .IsRequired(true);
 
             builder.Property(e => e.CreateAt)
-                .HasColumnName("created_at");
+                .HasColumnName("create_at");
 
             builder.ComplexProperty(e => e.ShippingAddress, a =>
             {
@@ -83,13 +83,6 @@ namespace Order.Infrastructure.Data.Configurations
                     .HasMaxLength(60)
                     .IsRequired();
             });
-
-            builder.HasOne<CustomerEntity>()
-                .WithMany()
-                .HasForeignKey(e => e.CustomerId)
-                .IsRequired(true)
-                .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_Order_Customer");
 
             builder.HasMany(e => e.OrderItems)
                 .WithOne()

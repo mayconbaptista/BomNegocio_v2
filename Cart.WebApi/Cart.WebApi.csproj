@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Carter" Version="8.2.1" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.12">
       <PrivateAssets>all</PrivateAssets>
@@ -24,5 +25,11 @@
     <ProjectReference Include="..\BuildBlocks.WebApi\BuildBlocks.WebApi.csproj" />
     <ProjectReference Include="..\BuildInBlocks.Messaging\BuildInBlocks.Messaging.csproj" />
   </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="..\Catalog.Api\Protos\product.proto" GrpcServices="Client">
+            <Link>Protos\product.proto</Link>
+        </Protobuf>
+    </ItemGroup>
 
 </Project>

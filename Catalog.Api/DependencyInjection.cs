@@ -21,7 +21,7 @@ namespace Catalog.Api
                     opt.EnableRetryOnFailure(3);
                     opt.MigrationsAssembly(typeof(CatalogContext).Assembly.FullName!);
                 });
-                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
                 options.EnableSensitiveDataLogging();
                 options.EnableDetailedErrors();
             });

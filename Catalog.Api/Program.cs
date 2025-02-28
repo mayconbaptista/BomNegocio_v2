@@ -5,6 +5,9 @@ using BuildBlocks.WebApi.Behaviors;
 using Catalog.Api;
 using Catalog.Api.Data.Extensions;
 using Catalog.Api.Dtos;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
+using BuildInBlocks.Messaging.Extensions;
 
 try
 {
@@ -18,8 +21,9 @@ try
         config.RegisterServicesFromAssembly(typeof(Program).Assembly);
         config.AddOpenBehavior(typeof(ExceptionHandlingBehavior<,>));
     });
-
     builder.Services.AddGrpc();
+
+    builder.Services.AddMessageBroker(builder.Configuration, Assembly.GetExecutingAssembly());
 
     // configurando o container de DI
     builder.Services.AddApiServices(builder.Configuration);
@@ -47,7 +51,6 @@ try
     }
 
     // Configure the HTTP request pipeline.
-    app.MapGrpcService<GreeterService>();
     app.MapGrpcService<ProductService>();
 
     app.MapCarter();

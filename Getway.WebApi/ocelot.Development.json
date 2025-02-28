@@ -8,7 +8,7 @@
       "DangerousAcceptAnyServerCertificateValidator": true,
       "DownstreamHostAndPorts": [
         {
-          "Host": "auth",
+          "Host": "auth.api",
           "Port": 8081
         }
       ]
@@ -21,7 +21,7 @@
       "DangerousAcceptAnyServerCertificateValidator": true,
       "DownstreamHostAndPorts": [
         {
-          "Host": "cart-api",
+          "Host": "cart.api",
           "Port": 8081
         }
       ]
@@ -34,7 +34,7 @@
       "DangerousAcceptAnyServerCertificateValidator": true,
       "DownstreamHostAndPorts": [
         {
-          "Host": "order",
+          "Host": "order.api",
           "Port": 8081
         }
       ]

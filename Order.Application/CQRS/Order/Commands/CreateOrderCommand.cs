@@ -1,10 +1,6 @@
-﻿//using MediatR;
-using BuildBlocks.Domain.ValueObjects;
-using Mapster;
-using Microsoft.Extensions.Logging;
+﻿using BuildBlocks.Domain.ValueObjects;
 using Order.Domain.Interfaces;
 using Order.Domain.Entities;
-using Order.Domain.ValueObjects;
 using BuildInBlocks.Messaging.Dtos;
 using BuildBlocks.Domain.Abstractions.CQRS;
 
@@ -19,33 +15,43 @@ public sealed record CreateOrderCommand : ICommand<Guid>
 }
 
 public sealed class CreateOrderCommandHandler
-    (IUnitOfWork unitOfWork, ILogger<CreateOrderCommand> logger) 
+    (IUnitOfWork unitOfWork) 
     : ICommandHandler<CreateOrderCommand, Guid>
 {
-    private readonly ILogger<CreateOrderCommand> _logger = logger;
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var entt = await this._unitOfWork.OrderRepository.AddAsync(this.CreateNewOrder(request));
+        var entt = this.CreateNewOrder(request);
+
+        await unitOfWork.OrderRepository.AddAsync(entt);
 
         foreach (var item in request.OrderItems)
         {
             entt.AddItem(item.ProductId, item.Quantity, item.UnitPrice);
         }
 
-        await this._unitOfWork.CommitAsync(cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return entt.Id;
     }
 
     public OrderEntity CreateNewOrder(CreateOrderCommand request)
     {
-        var shippingAddress = request.ShippingAdress.Adapt<Address>();
+        var shippingAddress = new Address(
+            request.ShippingAdress.Name,
+            request.ShippingAdress.Street,
+            request.ShippingAdress.City,
+            request.ShippingAdress.State,
+            request.ShippingAdress.Country,
+            request.ShippingAdress.ZipCode);
 
-        var billingAddress = request.BillingAdress.Adapt<Address>();
-
-        var items = request.OrderItems.Adapt<List<OrderItemEntity>>();
+        var billingAddress = new Address(
+            request.BillingAdress.Name,
+            request.BillingAdress.Street,
+            request.BillingAdress.City,
+            request.BillingAdress.State,
+            request.BillingAdress.Country,
+            request.BillingAdress.ZipCode);
 
         return OrderEntity.Create(request.Customer.Id, shippingAddress, billingAddress);
     }

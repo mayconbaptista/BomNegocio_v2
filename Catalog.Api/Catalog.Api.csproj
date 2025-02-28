@@ -27,11 +27,11 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-    <Folder Include="IntegrationEvents\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BuildBlocks.WebApi\BuildBlocks.WebApi.csproj" />
+    <ProjectReference Include="..\BuildInBlocks.Messaging\BuildInBlocks.Messaging.csproj" />
   </ItemGroup>
 
 </Project>
