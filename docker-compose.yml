@@ -2,15 +2,92 @@ version: '3.4'
 
 services:
 
-  catalog.webapi:
-    image: ${DOCKER_REGISTRY-}catalogwebapi
-    depends_on:
-      - bom_negocio.db
-    build:
-      context: .
-      dockerfile: Catalog.WebApi/Dockerfile
+    bom_negocio.db:
+        image: postgres:16.4
+        hostname: bom_negocio_db
+        container_name: bn_db
+        profiles: ["vs_debug", "db"]
 
-  bom_negocio.db:
-    image: postgres:16.4
-  
+
+    auth.webapi:
+        image: ${DOCKER_REGISTRY-}authwebapi
+        hostname: auth.api
+        container_name: auth.api
+        build:
+            context: .
+            dockerfile: Auth.WebApi/Dockerfile
+        depends_on:
+            - bom_negocio.db
+        profiles: ["vs_debug", "auth"]
+
+
+    getway.webapi:
+        image: ${DOCKER_REGISTRY-}getwaywebapi
+        hostname: getway
+        container_name: getway
+        build:
+            context: .
+            dockerfile: Getway.WebApi/Dockerfile
+        depends_on:
+            - auth.webapi
+            - cart.webapi
+            - catalog.api
+            - order.webapi
+        profiles: ["vs_debug", "gateway"]
+
+    message.broker:
+        image: rabbitmq:4.0-management
+        hostname: message-mq
+        container_name: masstransit-mq
+        profiles: ["vs_debug", "message_broker"]
+
+    aux:
+        image: alpine:3.14
+        command: sh -c "apk add --no-cache curl && while true; do sleep 30; done"
+        hostname: aux
+        container_name: aux
+        stdin_open: true
+        tty: true
+        profiles: ["vs_sso_debug"]
+
+    order.webapi:
+        image: ${DOCKER_REGISTRY-}orderwebapi
+        hostname: order.api
+        container_name: order.api
+        build:
+            context: .
+            dockerfile: Order.WebApi/Dockerfile
+        depends_on:
+            - bom_negocio.db
+            - message.broker
+        profiles: ["vs_debug", "order"] 
+
+    cart.webapi:
+        image: ${DOCKER_REGISTRY-}cartwebapi
+        hostname: cart.api
+        container_name: cart.api
+        build:
+            context: .
+            dockerfile: Cart.WebApi/Dockerfile
+        depends_on:
+            - bom_negocio.db
+            - message.broker 
+        profiles: ["vs_debug", "cart"]
+
+    catalog.db:
+        image: mysql:8.0.37
+        hostname: catalog.db
+        container_name: catalog.db
+        profiles: ["vs_debug", "catalog"]
+
+    catalog.api:
+        image: ${DOCKER_REGISTRY-}catalogapi
+        hostname: catalog.api
+        container_name: catalog.api
+        build:
+            context: .
+            dockerfile: Catalog.Api/Dockerfile
+        depends_on:
+            - catalog.db
+        profiles: ["vs_debug", "catalog"]
 

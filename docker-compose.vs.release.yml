@@ -1,4 +1,7 @@
 #See https://aka.ms/overrideVSDockerComposeConfiguration to understand how Visual Studio uses this override file.
+# refs: https://docs.docker.com/compose/extends/
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+# https://docs.docker.com/guides/dotnet/develop/
 
 version: '3.4'
 

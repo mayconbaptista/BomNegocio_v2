@@ -1,31 +1,129 @@
+# refs: https://docs.docker.com/compose/extends/
+# https://docs.docker.com/compose/compose-file/compose-file-v3/
+# https://docs.docker.com/guides/dotnet/develop/
+
 version: '3.4'
 
 services:
 
-  catalog.webapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "5000:5000"
-      - "5001:5001"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    bom_negocio.db:
+        environment:
+            POSTGRES_DB: catalog
+            POSTGRES_USER: catalog
+            POSTGRES_PASSWORD: catalog123
+        ports:
+            - "5432:5432"
+            - "5433:5433"
+        healthcheck:
+            test: ["CMD", "pg_isready"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes:
+            - db-data:/var/lib/postgresql/data
 
-  bom_negocio.db:
-    environment:
-        POSTGRES_DB: catalogDb
-        POSTGRES_USER: catalog
-        POSTGRES_PASSWORD: catalog123
-    ports:
-      - "5432:5432"
-      - "5433:5433"
-    volumes:
-      - bom_negocio.db_data:/var/lib/postgresql/data
+    auth.webapi:
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+            - ASPNETCORE_Kestrel__Certificates__Default__Password=123456 
+        ports:
+            - "8235:8080"
+            - "8236:8081"
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+            - ~/.aspnet/https:/https:ro
+            - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+        depends_on:
+            bom_negocio.db:
+                condition: service_healthy
 
+    getway.webapi:
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+        ports:
+            - "8080:8080"
+            - "8081:8081"
+            - "5010:5000" 
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+            - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+    message.broker:
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        environment:
+            RABBITMQ_DEFAULT_USER: guest
+            RABBITMQ_DEFAULT_PASS: guest
+        restart: always
+
+    order.webapi:
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+        ports:
+            - "8888:8080"
+            - "8881:8081"
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+            #- ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+            - ~/.aspnet/https:/https:ro
+        depends_on:
+            bom_negocio.db:
+                condition: service_healthy
+
+    cart.webapi:
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+        ports:
+            - "8087:8080"
+            - "8088:8081"
+            - "5002:5000"
+            - "5003:5001"
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+            - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+        depends_on:
+            bom_negocio.db:
+                condition: service_healthy
+    
+    catalog.db:
+        environment:
+            - MYSQL_ROOT_PASSWORD=P@ssw0rd2022
+            - MYSQL_DATABASE=catalog
+            - MYSQL_USER=catalog.api
+            - MYSQL_PASSWORD=CatalogP@ssw0rd2022
+            - MYSQL_TZ=America/Sao_Paulo
+        ports:
+            - "3308:3306"
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+         
+    catalog.api:
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_HTTP_PORTS=8080
+            - ASPNETCORE_HTTPS_PORTS=8081
+        ports:
+            - "8989:8080"
+            - "8181:8081"
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+            - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+        depends_on:
+            catalog.db:
+                condition: service_healthy
 volumes:
-  bom_negocio.db_data:
+    db-data:
+

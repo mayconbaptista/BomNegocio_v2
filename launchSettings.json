@@ -3,8 +3,10 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
-      "serviceActions": {
-        "catalog.webapi": "StartDebugging"
+      "composeProfile": {
+        "includes": [
+          "vs_debug"
+        ]
       }
     }
   }
