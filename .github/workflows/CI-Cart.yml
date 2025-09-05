@@ -1,0 +1,27 @@
+name: CI para Cart.Api
+
+on:
+  push:
+    paths:
+      - 'Cart.WebApi/**' # Otimização para rodar apenas quando este serviço for alterado
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # O pipeline vai rodar em uma máquina virtual Linux
+
+    steps:
+    # 1. Baixar o código do repositório
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Configurar o ambiente .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x # Use a versão do seu projeto
+
+    - name: Restore denpendencias
+      run: dotnet restore Cart.WebAPI/Cart.WebAPI.csproj
+
+    - name: Build
+      run: dotnet build Cart.WebApi/

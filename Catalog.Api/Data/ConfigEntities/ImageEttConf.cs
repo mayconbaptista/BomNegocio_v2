@@ -16,9 +16,14 @@ namespace Catalog.Api.Data.ConfigEntities
                 .HasColumnName("id")
                 .ValueGeneratedOnAdd();
 
-            builder.Property(p => p.Path)
+            builder.Property(p => p.path)
                 .HasColumnName("path_url")
                 .HasMaxLength(200)
+                .IsRequired(true);
+
+            builder.Property(p => p.name)
+                .HasColumnName("file_name")
+                .HasMaxLength(100)
                 .IsRequired(true);
 
             builder.Property(p => p.ProductId)

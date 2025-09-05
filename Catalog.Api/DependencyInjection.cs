@@ -1,4 +1,6 @@
-﻿using Catalog.Api.Data;
+﻿using Amazon.S3;
+using Catalog.Api.Configuration;
+using Catalog.Api.Data;
 using Catalog.Api.Data.Interfaces;
 using Catalog.Api.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,13 @@ namespace Catalog.Api
                 options.EnableSensitiveDataLogging();
                 options.EnableDetailedErrors();
             });
+
+            services.AddDefaultAWSOptions(configuration.GetAWSOptions("AWS"));
+            services.AddAWSService<IAmazonS3>(configuration.GetAWSOptions("AWS:S3"), ServiceLifetime.Singleton);
+
+            services.AddHttpClient();
+
+            services.Configure<AwsServiceS3Config>(configuration.GetSection("ProductConfig:AwsServiceS3Config"));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IProductRepository, ProductRepository>();

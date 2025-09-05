@@ -5,6 +5,6 @@ namespace BuildInBlocks.Messaging.Abstractions
     {
         public Guid Guid { get; } = Guid.NewGuid();
         public DateTimeOffset CreationAt { get; } = DateTime.UtcNow;
-        public string EventType => GetType().AssemblyQualifiedName;
+        public string EventType => GetType().AssemblyQualifiedName!;
     }
 }

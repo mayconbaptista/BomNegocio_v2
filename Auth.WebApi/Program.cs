@@ -3,6 +3,7 @@ using BuildBlocks.WebApi.Exceptions.Handlers;
 using BuildBlocks.WebApi.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
 try
@@ -34,8 +35,8 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwagger(typeof(Program).Assembly);
 
-    AuthorizationExtension.AddAuthorization(builder.Services, builder.Configuration);
-    AuthenticationExtension.AddAuthentication(builder.Services, builder.Configuration);
+    builder.Services.AddAuthorization(builder.Configuration);
+    builder.Services.AddAuthentication(builder.Configuration);
 
     builder.Services.AddIdentity<UserModel, IdentityRole>()
         .AddEntityFrameworkStores<AuthDbContext>()

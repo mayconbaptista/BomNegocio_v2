@@ -30,3 +30,8 @@ README.md
 !.git/refs/heads/**
 
 **/ApiGateways
+
+# me add
+localstack/
+scripts/
+volumes/

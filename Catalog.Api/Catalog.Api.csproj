@@ -14,6 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.1" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.6.7" />
     <PackageReference Include="Carter" Version="8.2.1" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.67.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
@@ -27,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
+    <Folder Include="Filters\" />
   </ItemGroup>
 
   <ItemGroup>

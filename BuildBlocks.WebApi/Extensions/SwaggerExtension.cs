@@ -13,6 +13,7 @@ namespace BuildBlocks.WebApi.Extensions
 
             services.AddSwaggerGen(c =>
             {
+                //c.OperationFilter<FormFileOperationFilter>();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = assembly.FullName, Version = "v1" });
                 c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
                 {

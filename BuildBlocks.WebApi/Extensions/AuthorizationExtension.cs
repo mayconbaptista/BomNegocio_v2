@@ -8,7 +8,7 @@ namespace BuildBlocks.WebApi.Extensions
 {
     public static class AuthorizationExtension
     {
-        public static void AddAuthorization(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddAuthorization(this IServiceCollection services, IConfiguration config)
         {
             services.AddAuthorization(options =>
             {
@@ -16,6 +16,8 @@ namespace BuildBlocks.WebApi.Extensions
                     .RequireAuthenticatedUser()
                     .Build();
             });
+
+            return services;
         }
     }
 }

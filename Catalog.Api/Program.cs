@@ -1,17 +1,27 @@
-using Carter;
-using Catalog.Api.Services;
-using BuildBlocks.WebApi.Extensions;
 using BuildBlocks.WebApi.Behaviors;
+using BuildBlocks.WebApi.Exceptions.Handlers;
+using BuildBlocks.WebApi.Extensions;
+using BuildInBlocks.Messaging.Extensions;
 using Catalog.Api;
 using Catalog.Api.Data.Extensions;
 using Catalog.Api.Dtos;
-using Microsoft.Extensions.Configuration;
+using Catalog.Api.Services;
 using System.Reflection;
-using BuildInBlocks.Messaging.Extensions;
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(builder =>
+        {
+            builder.AllowAnyOrigin();
+            builder.AllowAnyMethod();
+            builder.AllowAnyHeader();
+
+        });
+    });
 
     // Add services to the container.
     builder.Services.AddCarter();
@@ -32,6 +42,8 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwagger(typeof(Program).Assembly);
 
+    builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
     var app = builder.Build();
 
     if(!app.Environment.IsProduction())
@@ -46,9 +58,13 @@ try
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            await app.ApplyMigrations();
+            await app.ApplyMigrations(); 
         }
     }
+
+    app.UseCors();
+
+    app.UseExceptionHandler(op => { });
 
     // Configure the HTTP request pipeline.
     app.MapGrpcService<ProductService>();

@@ -29,7 +29,7 @@ namespace Catalog.Api.Data.ConfigEntities
 
             builder.Property(p => p.Description)
                 .HasColumnName("descricao")
-                .HasMaxLength(200)
+                .HasMaxLength(500)
                 .IsRequired(true);
 
             builder.Property(p => p.Price)

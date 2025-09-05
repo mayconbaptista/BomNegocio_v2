@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace Catalog.Api.Product.CreateProduct;
+namespace Catalog.Api.ProductEndPoints.CreateProduct;
 
 public record CreateProductRequest
 {

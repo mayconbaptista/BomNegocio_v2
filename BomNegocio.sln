@@ -16,11 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cart", "Cart", "{5C88CB0D-2E17-4FBA-A07D-8B38DA701D5B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A0687238-3C20-47D4-BD3D-CBC9DF1BD638}"
-	ProjectSection(SolutionItems) = preProject
-		01-init.sh = 01-init.sh
-		02-init.sql = 02-init.sql
-		03-init.sql = 03-init.sql
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cart.WebApi", "Cart.WebApi\Cart.WebApi.csproj", "{BDF62BA1-2DF7-4F3B-8024-73B57005CAE2}"
 EndProject
@@ -57,6 +52,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Order.Domain.Test", "Order.Domain.Test\Order.Domain.Test.csproj", "{81524383-3E7B-4B56-B775-BFBECB970DD7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog.Api", "Catalog.Api\Catalog.Api.csproj", "{F17EFD25-AC69-430D-ABB1-3630F3BCE99F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "localstack", "localstack", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -168,6 +165,7 @@ Global
 		{D99D63CC-E8AD-46C7-80C1-68DD04C36659} = {28BE1BA0-9A70-48E4-A61B-F11BC25BF65D}
 		{81524383-3E7B-4B56-B775-BFBECB970DD7} = {D99D63CC-E8AD-46C7-80C1-68DD04C36659}
 		{F17EFD25-AC69-430D-ABB1-3630F3BCE99F} = {25613B47-02D9-4212-9A54-B4215D3A0532}
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {A0687238-3C20-47D4-BD3D-CBC9DF1BD638}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3292534D-0EA4-450B-90EB-F4BD45903FF7}

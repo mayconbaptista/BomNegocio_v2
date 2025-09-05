@@ -4,7 +4,7 @@ using Catalog.Api.Entities;
 using Mapster;
 using MediatR;
 
-namespace Catalog.Api.Product.CreateProduct;
+namespace Catalog.Api.ProductEndPoints.CreateProduct;
 
 public record CreateProductCommand : ICommand<Guid>
 {

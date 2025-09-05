@@ -1,7 +1,6 @@
-﻿using Carter;
-using MediatR;
+﻿using MediatR;
 
-namespace Catalog.Api.Product.GetProductById;
+namespace Catalog.Api.ProductEndPoints.GetProductById;
 
 public record GetProductByIdResponse
 {

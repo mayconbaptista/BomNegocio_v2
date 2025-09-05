@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Catalog.Api.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class start : Migration
+    public partial class inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -47,7 +47,7 @@ namespace Catalog.Api.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     codigo_sku = table.Column<string>(type: "varchar(16)", maxLength: 16, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    descricao = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    descricao = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     preco = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     quantidade = table.Column<uint>(type: "int unsigned", nullable: false),
@@ -72,6 +72,8 @@ namespace Catalog.Api.Data.Migrations
                     id = table.Column<uint>(type: "int unsigned", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     path_url = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    file_name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     produto_Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },

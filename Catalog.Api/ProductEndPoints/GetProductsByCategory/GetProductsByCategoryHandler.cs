@@ -3,9 +3,9 @@ using Catalog.Api.Dtos;
 using Mapster;
 using MediatR;
 
-namespace Catalog.Api.Product.GetProductsByCategory;
+namespace Catalog.Api.ProductEndPoints.GetProductsByCategory;
 
-public record GetProductsByCategoryQuery(Guid CategoryId) : IRequest<ICollection<ProductDto>>;
+public record GetProductsByCategoryQuery(Guid? CategoryId) : IRequest<ICollection<ProductDto>>;
 
 public class GetProductsByCategoryHandler(IUnitOfWork unitOfWork) : IRequestHandler<GetProductsByCategoryQuery, ICollection<ProductDto>>
 {

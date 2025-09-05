@@ -1,10 +1,11 @@
-﻿using Carter;
-using Catalog.Api.Dtos;
+﻿using Catalog.Api.Dtos;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Catalog.Api.Product.GetProductsByCategory;
+namespace Catalog.Api.ProductEndPoints.GetProductsByCategory;
+
+public record ProductFilterRequest(Guid? categoryId);
 
 public class GetProductsByCategoryEndPoint : ICarterModule
 {
@@ -12,7 +13,6 @@ public class GetProductsByCategoryEndPoint : ICarterModule
     {
         app.MapGet("/product/category/{categoryId:guid}", async ([FromRoute] Guid categoryId, ISender sender) =>
         {
-
             var query = new GetProductsByCategoryQuery(categoryId);
 
             var result = await sender.Send(query);
