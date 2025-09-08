@@ -1,8 +1,12 @@
 name: CI para Catalog.API
 
 on:
+  pull_request:
+    branches: [ "*" ]
+    paths:
+      - 'Catalog.Api/**'
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
     paths:
       - 'Catalog.Api/**' # Otimização para rodar apenas quando este serviço for alterado
 
@@ -22,7 +26,7 @@ jobs:
         dotnet-version: 8.0.x # Use a versão do seu projeto
 
     - name: Restore denpendencias
-      run: dotnet restore Catalog.API/Catalog.API.csproj
+      run: dotnet restore Catalog.Api/
 
     - name: Build
       run: dotnet build Catalog.Api/
