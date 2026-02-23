@@ -3,23 +3,11 @@ using BuildBlocks.WebApi.Exceptions.Handlers;
 using BuildBlocks.WebApi.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-
-        });
-    });
 
     // Add services to the container.
     InjectionContainer.RegisterServices(builder.Services, builder.Configuration);
@@ -30,11 +18,11 @@ try
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
         });
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwagger(typeof(Program).Assembly);
 
+    // DICA: Auth deve vir antes do Identity em alguns cenários, mas aqui está ok
     builder.Services.AddAuthorization(builder.Configuration);
     builder.Services.AddAuthentication(builder.Configuration);
 
@@ -42,28 +30,26 @@ try
         .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();
 
-    var connection = builder.Configuration.GetConnectionString("AuthConnection") 
+    var connection = builder.Configuration.GetConnectionString("AuthConnection")
         ?? throw new ArgumentNullException("Connection string not found");
 
-    builder.Services.AddDbContext<AuthDbContext>(options =>
+    builder.Services.AddDbContext<AuthDbContext>((sp, options) =>
     {
         options.UseNpgsql(connection, opt =>
         {
             opt.SetPostgresVersion(new Version(16, 4));
             opt.EnableRetryOnFailure(3);
+            opt.MigrationsAssembly(typeof(AuthDbContext).Assembly.FullName!);
         });
-        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
-        options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
     });
 
-    // responsabilidades transversais
     builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
     if (!app.Environment.IsProduction())
     {
         app.UseSwagger();
@@ -73,30 +59,26 @@ try
             options.RoutePrefix = string.Empty;
         });
 
-        if(app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
             app.ApplyMigrations();
         }
     }
 
-    app.UseCors();
-
     app.UseExceptionHandler(options => { });
 
-    app.UseHttpsRedirection();
-
     app.UseAuthentication();
-
     app.UseAuthorization();
 
     app.MapControllers();
 
     app.Run();
 
-}catch (Exception ex)
+}
+catch (Exception ex)
 {
     Console.WriteLine(ex.Message);
+
     throw;
 }
-

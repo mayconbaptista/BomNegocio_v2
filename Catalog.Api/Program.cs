@@ -12,16 +12,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-
-        });
-    });
 
     // Add services to the container.
     builder.Services.AddCarter();
@@ -31,6 +21,7 @@ try
         config.RegisterServicesFromAssembly(typeof(Program).Assembly);
         config.AddOpenBehavior(typeof(ExceptionHandlingBehavior<,>));
     });
+
     builder.Services.AddGrpc();
 
     builder.Services.AddMessageBroker(builder.Configuration, Assembly.GetExecutingAssembly());
@@ -62,9 +53,11 @@ try
         }
     }
 
-    app.UseCors();
 
     app.UseExceptionHandler(op => { });
+
+    //app.UseAuthentication();
+    //app.UseAuthorization();
 
     // Configure the HTTP request pipeline.
     app.MapGrpcService<ProductService>();

@@ -68,5 +68,22 @@ namespace Catalog.Api.Data.Repositories
                 .Include(x => x.Images)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<List<ProductEntity>> Filter(List<Expression<Func<ProductEntity, bool>>> expressions)
+        {
+            var query = _context.Products
+                .Include(x => x.Category)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if(expressions != null && expressions.Any())
+            {
+                foreach (var expression in expressions)
+                {
+                    query = query.Where(expression);
+                }
+            }
+            return await query.OrderBy(c => c.Name).ToListAsync();
+        }
     }
 }

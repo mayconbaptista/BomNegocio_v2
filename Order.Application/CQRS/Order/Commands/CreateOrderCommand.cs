@@ -3,6 +3,8 @@ using Order.Domain.Interfaces;
 using Order.Domain.Entities;
 using BuildInBlocks.Messaging.Dtos;
 using BuildBlocks.Domain.Abstractions.CQRS;
+using Order.Domain.ValueObjects;
+using Order.Domain.Enums;
 
 namespace Order.Application.CQRS.Order.Commands;
 
@@ -11,6 +13,8 @@ public sealed record CreateOrderCommand : ICommand<Guid>
     public AddressDto ShippingAdress { get; init; }
     public AddressDto BillingAdress { get; init; }
     public CustomerDto Customer { get; init; }
+    public PaymentDto Payment { get; init; }
+    public DeliveryDto Delivery { get; init; }
     public List<OrderItemDto> OrderItems { get; init; } = new();
 }
 
@@ -53,6 +57,55 @@ public sealed class CreateOrderCommandHandler
             request.BillingAdress.Country,
             request.BillingAdress.ZipCode);
 
-        return OrderEntity.Create(request.Customer.Id, shippingAddress, billingAddress);
+        OrderEntity entt = OrderEntity.Create(
+            request.Customer.Id,
+            shippingAddress,
+            billingAddress,
+            Payment.Create(
+                request.Payment.Type,
+                request.Payment.CardNumber,
+                request.Payment.CardHolderName,
+                request.Payment.CardExpirationDate,
+                request.Payment.CardCvv,
+                null),
+            Delivery.Create(
+                (DeliveryType) request.Delivery.Type,
+                request.Delivery.EstimatedDeliveryDate,
+                request.Delivery.Price)
+            );
+
+        return entt;
+    }
+
+    public OrderEntity CreateNewOrderPix(CreateOrderCommand request)
+    {
+        var shippingAddress = new Address(
+            request.ShippingAdress.Name,
+            request.ShippingAdress.Street,
+            request.ShippingAdress.City,
+            request.ShippingAdress.State,
+            request.ShippingAdress.Country,
+            request.ShippingAdress.ZipCode);
+
+        var billingAddress = new Address(
+            request.BillingAdress.Name,
+            request.BillingAdress.Street,
+            request.BillingAdress.City,
+            request.BillingAdress.State,
+            request.BillingAdress.Country,
+            request.BillingAdress.ZipCode);
+
+        OrderEntity entt = OrderEntity.Create(
+            request.Customer.Id,
+            shippingAddress,
+            billingAddress,
+            Payment.PIX(string.Empty),
+            Delivery.Create(
+                (DeliveryType)request.Delivery.Type,
+                request.Delivery.EstimatedDeliveryDate,
+                request.Delivery.Price)
+            );
+
+        return entt;
     }
 }

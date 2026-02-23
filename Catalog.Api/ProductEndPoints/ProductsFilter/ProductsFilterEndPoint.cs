@@ -1,22 +1,30 @@
 ﻿
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Catalog.Api.ProductEndPoints.ProductsFilter
+namespace Catalog.Api.ProductEndPoints.ProductsFilter;
+
+
+public class ProductsFilterEndPoint : ICarterModule
 {
-    public class ProductsFilterEndPoint : ICarterModule
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        public void AddRoutes(IEndpointRouteBuilder app)
+        app.MapGet("/product/filter/", async (ISender sender, HttpRequest req) =>
         {
-            app.MapGet("/product/filter/", async (ISender sender) =>
+            var command = new ProductsFilterCommand
             {
-                var response = await sender.Send(new ProductsFilterCommand());
+                Category = req.Query["category"],
+                Ids = req.Query["ids"].Select(Guid.Parse).ToList()
+            };
 
-                return Results.Ok(response);
+            var response = await sender.Send(command);
 
-            }).WithName("FilterProducts")
-           .Produces(StatusCodes.Status200OK)
-           .WithSummary("Filter products")
-           .WithDescription("filter product by ...");
-        }
+            return Results.Ok(response);
+
+        }).WithName("FilterProducts")
+        .AllowAnonymous()
+       .Produces(StatusCodes.Status200OK)
+       .WithSummary("Filter products")
+       .WithDescription("filter product by ...");
     }
 }

@@ -1,9 +1,9 @@
 ﻿
 namespace Order.Domain.Enums
 {
-    public enum PaymentType
+    public enum PaymentMethod
     {
-        CARD = 0,
+        CREDIT_CARD = 0,
         PAYMENT = 1,
         QRCODE = 2,
         PIX = 3

@@ -16,7 +16,7 @@ jobs:
 
     # 2. Configurar o ambiente .NET
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x # Use a versão do seu projeto
 
@@ -25,3 +25,30 @@ jobs:
 
     - name: Build
       run: dotnet build Cart.WebApi/
+
+  test_and_coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # 1. Configurar ambiente e rodar testes para gerar o relatório (ex: para .NET)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Rodar Testes e Gerar Cobertura
+      # Este comando é crucial e varia conforme sua linguagem/framework.
+      # Ele deve gerar um arquivo de cobertura (ex: coverage.cobertura.xml)
+      run: dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage-results -- DataCollectionRunSettings.Settings.xml
+
+    # 2. Publicar os resultados da cobertura e FALHAR se a taxa for baixa
+    - name: Verificar Cobertura e Definir Status
+      uses: irongut/Code-Coverage-Action@v1
+      with:
+        # A Action que você usa pode variar.
+        # Muitas Actions (como `Code Coverage Summary`) têm uma opção para falhar o workflow:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        code_coverage_path: '**/*.cobertura.xml' # Caminho para o seu relatório
+        minimum_coverage: 90 # Configura o mínimo aceitável!
+        # A opção 'fail_below_min: true' (ou equivalente) é o que fará o Job falhar.

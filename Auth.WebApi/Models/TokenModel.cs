@@ -3,7 +3,7 @@
     public class TokenModel
     {
         public string UserId { get; init; }
-        public string AcessToken { get; init; }
+        public string AccessToken { get; init; }
         public DateTime ExpirationAt { get; init; }
     }
 }

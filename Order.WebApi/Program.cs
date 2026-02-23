@@ -8,17 +8,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-
-        });
-    });
-
     // Add services to the container.
     builder.Services.AddApplicationServices(builder.Configuration);
     builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -51,8 +40,6 @@ try
             await app.ApplyMigrations();
         }
     }
-
-    app.UseCors();
 
     app.UseExceptionHandler(options => { });
 

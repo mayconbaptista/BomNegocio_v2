@@ -61,7 +61,7 @@ namespace Auth.WebApi.Services.Implements
             var result = new TokenModel
             {
                 UserId = user.Id,
-                AcessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
                 ExpirationAt = DateTime.Now.AddMinutes(5)
             };
 

@@ -1,17 +1,17 @@
 {
   "Routes": [
     {
-      "UpstreamPathTemplate": "/api/Auth{everything}",
+        "UpstreamPathTemplate": "/api/Auth{everything}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
-      "DownstreamPathTemplate": "/api/Auth{everything}",
-      "DownstreamScheme": "https",
-      "DangerousAcceptAnyServerCertificateValidator": true,
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "auth.api",
-          "Port": 8081
-        }
-      ]
+        "DownstreamPathTemplate": "/api/Auth{everything}",
+        "DownstreamScheme": "https",
+        "DangerousAcceptAnyServerCertificateValidator": true,
+        "DownstreamHostAndPorts": [
+            {
+                "Host": "auth.api",
+                "Port": 8081
+            }
+        ]
     },
     {
       "UpstreamPathTemplate": "/api/Cart{everything}",

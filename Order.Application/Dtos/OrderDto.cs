@@ -1,6 +1,4 @@
-﻿
-using BuildInBlocks.Messaging.Dtos;
-using Order.Domain.ValueObjects;
+﻿using BuildInBlocks.Messaging.Dtos;
 
 namespace Order.Application.Dtos;
 

@@ -84,6 +84,54 @@ namespace Order.Infrastructure.Data.Configurations
                     .IsRequired();
             });
 
+            builder.ComplexProperty(e => e.Payment, a =>
+            {
+                a.Property(e => e.Currency)
+                    .HasColumnName("payment_currency")
+                    .HasColumnType("varchar(3)")
+                    .IsRequired(true);
+
+                a.Property(e => e.CardCvv)
+                    .HasColumnName("payment_cardcvv")
+                    .HasMaxLength(3)
+                    .IsRequired(false);
+
+                a.Property(e => e.CardHolderName)
+                    .HasColumnName("payment_cardHolderName")
+                    .HasMaxLength(60)
+                    .IsRequired(false);
+
+                a.Property(e => e.CardNumber)
+                    .HasColumnName("payment_cardNumber")
+                    .HasMaxLength(16)
+                    .IsRequired(false);
+
+                a.Property(e => e.CardExpirationDate)
+                    .HasColumnName("payment_cardExpirationDate")
+                    .HasMaxLength(60)
+                    .IsRequired();
+
+                a.Property(e => e.QrCodePayload)
+                    .HasColumnName("payment_qrCodePayload")
+                    .HasMaxLength(60)
+                    .IsRequired();
+            });
+
+            builder.ComplexProperty(e => e.Delivery, a =>
+            {
+                a.Property(e => e.Type)
+                    .HasColumnName("delivery_type")
+                    .IsRequired();
+
+                a.Property(e => e.EstimatedDeliveryDate)
+                    .HasColumnName("delivery_estimatedDeliveryDate")
+                    .IsRequired();
+
+                a.Property(e => e.Price)
+                    .HasColumnName("delivery_price")
+                    .IsRequired();
+            });
+
             builder.HasMany(e => e.OrderItems)
                 .WithOne()
                 .HasForeignKey(e => e.OrderId)

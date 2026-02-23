@@ -11,7 +11,9 @@ namespace Order.Domain.Entities
         public Guid CustomerId { get; private set; }
         public Address ShippingAddress { get; private set; } = default!;
         public Address BillingAddress { get; private set; } = default!;
-        public OrderStatus Status { get; private set; } = default;
+        public Payment Payment { get; private set; } = default!;
+        public Delivery Delivery { get; private set; } = default!;
+        public OrderStatus Status { get; private set; } = default!;
         public decimal TotalPrice => OrderItems.Sum(i => i.UnitPrice * i.Quantity);
 
 
@@ -22,14 +24,18 @@ namespace Order.Domain.Entities
         public static OrderEntity Create(
             Guid customerId,
             Address shippingAddress,
-            Address billingAddress)
+            Address billingAddress,
+            Payment payment,
+            Delivery delivery)
         {
             var order = new OrderEntity
             {
                 Status = OrderStatus.Pending,
                 CustomerId = customerId,
                 ShippingAddress = shippingAddress,
-                BillingAddress = billingAddress
+                BillingAddress = billingAddress,
+                Payment = payment,
+                Delivery = delivery
             };
 
             order.AddDomainEvent(new OrderCreateEvent(order));

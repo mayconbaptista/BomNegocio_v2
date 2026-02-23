@@ -12,13 +12,20 @@ namespace Catalog.Api.ProductEndPoints.ImageJob;
 
 public record ImageMoveS3JobCommand(string patch) : ICommand;
 
-public class ImageMoveS3JobHandler(IUnitOfWork unitOfWork, IAmazonS3 amazonS3, IOptions<AwsServiceS3Config> s3Config, HttpClient httpClient, ILogger<ImageMoveS3JobHandler> logger, IConfiguration config) 
+public class ImageMoveS3JobHandler(
+    IUnitOfWork unitOfWork, 
+    IAmazonS3 amazonS3, 
+    IOptions<AwsServiceS3Config> s3Config, 
+    HttpClient httpClient, 
+    ILogger<ImageMoveS3JobHandler> logger, 
+    IConfiguration config) 
     : ICommandHandler<ImageMoveS3JobCommand>
 {
     public async Task<Unit> Handle(ImageMoveS3JobCommand request, CancellationToken cancellationToken)
     {
         try
         {
+
             var images = await unitOfWork.IProductRepository.GeImages();
 
             var serviceUrl = config.GetValue<string>("AWS:S3:ServiceURL") 

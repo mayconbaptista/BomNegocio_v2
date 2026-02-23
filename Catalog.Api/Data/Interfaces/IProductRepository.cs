@@ -1,4 +1,5 @@
 ﻿using Catalog.Api.Entities;
+using System.Linq.Expressions;
 
 namespace Catalog.Api.Data.Interfaces
 {
@@ -11,5 +12,7 @@ namespace Catalog.Api.Data.Interfaces
         public Task<IList<ImageEntity>> GeImages();
 
         Task<ProductEntity?> GetByIdWithDetais(Guid id);
+
+        Task<List<ProductEntity>> Filter(List<Expression<Func<ProductEntity, bool>>> expressions);
     }
 }
