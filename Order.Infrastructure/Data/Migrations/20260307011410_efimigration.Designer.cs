@@ -13,8 +13,8 @@ using Order.Infrastructure.Data;
 namespace Order.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(OrderContext))]
-    [Migration("20250226221021_init")]
-    partial class init
+    [Migration("20260307011410_efimigration")]
+    partial class efimigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,19 +33,21 @@ namespace Order.Infrastructure.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("CostumerIdentifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("CreateAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("create_at");
 
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTimeOffset?>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status_code");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.ComplexProperty<Dictionary<string, object>>("BillingAddress", "Order.Domain.Entities.OrderEntity.BillingAddress#Address", b1 =>
                         {
@@ -71,8 +73,8 @@ namespace Order.Infrastructure.Data.Migrations
 
                             b1.Property<string>("State")
                                 .IsRequired()
-                                .HasMaxLength(60)
-                                .HasColumnType("character varying(60)")
+                                .HasMaxLength(2)
+                                .HasColumnType("character varying(2)")
                                 .HasColumnName("billing_address_state");
 
                             b1.Property<string>("Street")
@@ -83,9 +85,28 @@ namespace Order.Infrastructure.Data.Migrations
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
-                                .HasMaxLength(60)
-                                .HasColumnType("character varying(60)")
-                                .HasColumnName("billing_address_zip_code");
+                                .HasMaxLength(8)
+                                .HasColumnType("character(8)")
+                                .HasColumnName("billing_address_zip_code")
+                                .IsFixedLength();
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("Delivery", "Order.Domain.Entities.OrderEntity.Delivery#Delivery", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<DateOnly>("EstimatedDeliveryDate")
+                                .HasColumnType("date")
+                                .HasColumnName("delivery_estimatedDeliveryDate");
+
+                            b1.Property<decimal>("Price")
+                                .HasColumnType("numeric")
+                                .HasColumnName("delivery_price");
+
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("delivery_type");
                         });
 
                     b.ComplexProperty<Dictionary<string, object>>("ShippingAddress", "Order.Domain.Entities.OrderEntity.ShippingAddress#Address", b1 =>
@@ -148,7 +169,53 @@ namespace Order.Infrastructure.Data.Migrations
 
                     b.HasKey("OrderId", "ProductId");
 
-                    b.ToTable("order_item", (string)null);
+                    b.ToTable("Order_item", (string)null);
+                });
+
+            modelBuilder.Entity("Order.Domain.Entities.PaymentEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpireIn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expire_in");
+
+                    b.Property<Guid>("Key")
+                        .HasColumnType("uuid")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("location");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("method");
+
+                    b.Property<string>("PixCopyAndPaste")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("pix_copy_and_paste");
+
+                    b.Property<string>("PxId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("px_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Payment", (string)null);
                 });
 
             modelBuilder.Entity("Order.Domain.Entities.OrderItemEntity", b =>
@@ -161,9 +228,22 @@ namespace Order.Infrastructure.Data.Migrations
                         .HasConstraintName("FK_Order_OrderItem");
                 });
 
+            modelBuilder.Entity("Order.Domain.Entities.PaymentEntity", b =>
+                {
+                    b.HasOne("Order.Domain.Entities.OrderEntity", null)
+                        .WithOne("Payment")
+                        .HasForeignKey("Order.Domain.Entities.PaymentEntity", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_order_payment");
+                });
+
             modelBuilder.Entity("Order.Domain.Entities.OrderEntity", b =>
                 {
                     b.Navigation("OrderItems");
+
+                    b.Navigation("Payment")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

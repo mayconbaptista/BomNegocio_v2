@@ -1,3 +1,3 @@
 ﻿namespace BuildInBlocks.Messaging.Dtos;
 
-public record CustomerDto(Guid Id, string Name, string Email);
+public record CustomerDto(string Documento, string Name, string Email);

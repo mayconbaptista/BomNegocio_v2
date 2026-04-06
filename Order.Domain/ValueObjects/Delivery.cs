@@ -1,21 +1,26 @@
 ﻿
 using BuildBlocks.Domain.Abstractions;
+using BuildBlocks.Domain.Exceptions;
 using Order.Domain.Enums;
+using Order.Domain.Exceptions;
+using Order.Domain.Extensions;
 
 namespace Order.Domain.ValueObjects
 {
     public class Delivery : ValueObject
     {
-        public DeliveryType Type { get; set; }
-        public DateOnly EstimatedDeliveryDate { get; private set; }
-        public decimal Price { get; private set; }
+        required public DeliveryType Type { get; init; }
+        required public DateOnly EstimatedDeliveryDate { get; init; }
+        required public decimal Price { get; init; }
 
         public static Delivery Create(DeliveryType type, DateOnly estimatedDeliveryDate, decimal price)
         {
-            if(estimatedDeliveryDate <= DateOnly.FromDateTime(DateTime.UtcNow))
-            {
-                throw new ArgumentException("A data de entrega estimada não pode ser uma data passada.");
-            }
+            var erros = new List<string>();
+            
+            erros.AddIf(estimatedDeliveryDate < DateOnly.FromDateTime(DateTime.Today), "A data de entrega estimada não pode ser retroativa")
+                .AddIf(price < 0, "O preço de entrega não pode ser negativo");
+
+            DomainException.ThrowIfAnyErro(erros, "Dados de entrega inválidos");
 
             return new Delivery()
             {

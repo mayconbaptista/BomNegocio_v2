@@ -1,19 +1,22 @@
 ﻿
 using BuildBlocks.Domain.Abstractions;
+using BuildBlocks.Domain.Exceptions;
 using BuildBlocks.Domain.ValueObjects;
 using Order.Domain.Enums;
 using Order.Domain.Events;
+using Order.Domain.Exceptions;
+using Order.Domain.Extensions;
 
 namespace Order.Domain.Entities
 {
     public sealed class OrderEntity : BaseAuditableEntity
     {
-        public Guid CustomerId { get; private set; }
-        public Address ShippingAddress { get; private set; } = default!;
-        public Address BillingAddress { get; private set; } = default!;
-        public Payment Payment { get; private set; } = default!;
-        public Delivery Delivery { get; private set; } = default!;
-        public OrderStatus Status { get; private set; } = default!;
+        required public string CostumerIdentifier { get;  init; }
+        required public Address ShippingAddress { get; init; }
+        required public Address BillingAddress { get; init; }
+        required public Delivery Delivery { get; init; }
+        public OrderStatus Status { get; private set; }
+        required public PaymentEntity Payment { get; init; }
         public decimal TotalPrice => OrderItems.Sum(i => i.UnitPrice * i.Quantity);
 
 
@@ -22,16 +25,22 @@ namespace Order.Domain.Entities
         private readonly List<OrderItemEntity> _OrderItems = new();
 
         public static OrderEntity Create(
-            Guid customerId,
+            string custumerIdentifier,
             Address shippingAddress,
             Address billingAddress,
-            Payment payment,
+            PaymentEntity payment,
             Delivery delivery)
         {
+
+            if(custumerIdentifier.Length != 11 && custumerIdentifier.Length != 14)
+            {
+                throw new DomainException("O identificador do cliente deve conter 11 ou 14 caracteres");
+            }
+
             var order = new OrderEntity
             {
                 Status = OrderStatus.Pending,
-                CustomerId = customerId,
+                CostumerIdentifier = custumerIdentifier,
                 ShippingAddress = shippingAddress,
                 BillingAddress = billingAddress,
                 Payment = payment,

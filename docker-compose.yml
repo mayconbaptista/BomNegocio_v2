@@ -43,6 +43,8 @@ services:
         depends_on:
             - bom_negocio.db
             - localstack
+        volumes:
+            - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
         profiles: ["vs_debug", "order"] 
 
     cart.webapi:

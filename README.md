@@ -112,5 +112,6 @@ Você pode testar via o front end da aplicação, acesse o link do repositório 
 [🌐 BnShop](https://github.com/mayconbaptista/bom-negocio_web/tree/master)
 
 
+### Migration
 
-
+Add-Migration NomeDaSuaMigration -Project "NomeDoSeuProjeto" -StartupProject "NomeDoProjetoPrincipal" -OutputDir "Pasta/Subpasta"

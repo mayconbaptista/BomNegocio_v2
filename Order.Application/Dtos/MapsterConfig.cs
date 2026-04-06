@@ -34,7 +34,7 @@ namespace Order.Application.Dtos
 
             TypeAdapterConfig<Customer, CustomerDto>
                 .NewConfig()
-                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Documento, src => string.Empty)
                 .Map(dest => dest.Email, src => src.Email)
                 .Map(dest => dest.Name, src => src.Name);
 
@@ -50,7 +50,7 @@ namespace Order.Application.Dtos
             TypeAdapterConfig<OrderDto, OrderEntity>
                 .NewConfig()
                 .Ignore(dest => dest.Id)
-                .Map(dest => dest.CustomerId, src => src.Customer.Id)
+                .Map(dest => dest.CostumerIdentifier, src => src.Customer.Documento)
                 .Map(dest => dest.ShippingAddress, src => src.ShippingAddress)
                 .Map(dest => dest.BillingAddress, src => src.BillingAddress)
                 .Map(dest => dest.TotalPrice, src => src.TotalPrice)

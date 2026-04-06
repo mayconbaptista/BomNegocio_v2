@@ -10,6 +10,7 @@ namespace Cart.WebApi.Cart.CartCheckout;
 public record CartCheckoutCommand : ICommand<CartCheckoutResult>
 {
     public Guid CustomerId { get; init; }
+    public CustomerDto Customer { get; init; }
     public AddressDto ShippingAddress { get; init; }
     public AddressDto BillingAddress { get; init; }
 }
@@ -77,7 +78,7 @@ public class CartCheckoutHandler(
 
             var cartCheckoutEvent = new CartCheckoutEvent
             {
-                Customer = new CustomerDto(request.CustomerId, "User name", "maycon@ufu.com.br"),
+                Customer = request.Customer,
                 ShippingAddress = request.ShippingAddress,
                 BillingAddress = request.BillingAddress,
                 Itens = productsResponse.Select(x => new CartItemDto(Guid.Parse(x.Id), (decimal) x.Price, x.Quantity)).ToList()
@@ -91,6 +92,7 @@ public class CartCheckoutHandler(
         catch(Exception ex)
         {
             logger.LogError(ex, $"{ex.Message}");
+
             throw;
         }
     }

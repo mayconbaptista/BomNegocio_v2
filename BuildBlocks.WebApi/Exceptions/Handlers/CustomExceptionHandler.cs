@@ -19,11 +19,11 @@ namespace BuildBlocks.WebApi.Exceptions.Handlers
                         StatusCodes.Status422UnprocessableEntity
                     ),
                 FluentValidation.ValidationException fluentValidationException =>
-                (
-                    fluentValidationException.Message,
-                    fluentValidationException.GetType().Name,
-                    StatusCodes.Status422UnprocessableEntity
-                ),
+                    (
+                        fluentValidationException.Message,
+                        fluentValidationException.GetType().Name,
+                        StatusCodes.Status422UnprocessableEntity
+                    ),
                 BadHttpRequestException badHtpReqException =>
                     (
                         badHtpReqException.Message,

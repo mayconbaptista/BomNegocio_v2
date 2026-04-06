@@ -1,12 +1,15 @@
 ﻿
+using System.Text.Json.Serialization;
+
 namespace Order.Application.Dtos
 {
     public record PaymentDto
     {
-        public int Type { get; set; }
-        public string? CardNumber { get; set; }
-        public string? CardHolderName { get; set; }
-        public DateOnly? CardExpirationDate { get; set; }
-        public string? CardCvv { get; set; }
+        public Guid key { get; set; }
+        public string txid { get; set; }
+         public decimal value { get; set; }
+        public DateTime? createdAt { get; set; }
+        public string Qrcode { get; set; }
+        public string CopyAndPaste { get; set; }
     }
 }

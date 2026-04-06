@@ -13,6 +13,20 @@ namespace BuildInBlocks.Messaging.Extensions
 
         public static IServiceCollection AddMessageBroker(this IServiceCollection services, IConfiguration configuration, Assembly? consumer = null)
         {
+            var isMigration = Environment.GetCommandLineArgs()
+                .Any(arg => arg.Contains("migrations", StringComparison.OrdinalIgnoreCase));
+
+            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+            if (isMigration)
+            {
+                services.AddMassTransit(x => { x.UsingInMemory(); });
+
+                Console.WriteLine("APlicando mastransit em memoria para migration#####");
+
+                return services;
+            }
+
             var AWS_ACESS_KEY = configuration["AWS_ACCESS_KEY_ID"] 
                 ?? throw new ArgumentNullException("Erro ao obter o AWS_ACCESS_KEY_ID.");
             

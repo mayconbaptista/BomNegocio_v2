@@ -60,13 +60,16 @@ services:
             - ASPNETCORE_HTTPS_PORTS=8081
             - AWS_REGION=us-east-1
             - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-            - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY 
+            - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+            - EFI__CertificatePath=/home/app/.certs/efi-homologacao-883595.p12
+            - EFI__CertificatePassword=
         ports:
             - "8888:8080"
             - "8881:8081"
         volumes:
             - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
             #- ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+            - ${APPDATA}/EfiCertificates/efi-homologacao-883595.p12:/home/app/.certs/efi-homologacao-883595.p12:ro
             - ~/.aspnet/https:/https:ro
         depends_on:
             bom_negocio.db:
