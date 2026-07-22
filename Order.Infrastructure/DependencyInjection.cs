@@ -62,7 +62,7 @@ namespace Order.Infrastructure
             else
             {
                 var pathCertificado = configuration["EFI:CertificatePath"] ?? throw new ArgumentNullException("Payment:CertificatePath is not found in the configuration file.");
-                var passwordCertificado = configuration["EFI:CertificatePassword"] ?? throw new ArgumentNullException("Payment:CertificatePassword is not found in the configuration file.");
+                var passwordCertificado = configuration["EFI:CertificatePassword"] ?? string.Empty; //throw new ArgumentNullException("Payment:CertificatePassword is not found in the configuration file.");
                 var baseUrl = configuration["EFI:BaseUrl"] ?? throw new ArgumentNullException("Payment:BaseUrl is not found in the configuration file.");
                 
                 var certificado = new X509Certificate2(pathCertificado , passwordCertificado);

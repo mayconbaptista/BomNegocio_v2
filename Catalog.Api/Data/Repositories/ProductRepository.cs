@@ -73,6 +73,7 @@ namespace Catalog.Api.Data.Repositories
         {
             var query = _context.Products
                 .Include(x => x.Category)
+                .Include(x => x.Images)
                 .AsNoTracking()
                 .AsQueryable();
 

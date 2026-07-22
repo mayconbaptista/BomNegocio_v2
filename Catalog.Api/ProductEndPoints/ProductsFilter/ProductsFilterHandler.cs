@@ -23,7 +23,7 @@ public class ProductsFilterHandler(IUnitOfWork unitOfWork)
 
         if (!string.IsNullOrEmpty(request.Category))
         {
-            filters.Add(x => x.Category.Name.ToLower() == request.Category.ToLower());
+            filters.Add(x => x.Category.Name.Equals(request.Category, StringComparison.CurrentCultureIgnoreCase));
         }
 
         if(request.Ids is not null && request.Ids.Any())

@@ -2,7 +2,17 @@
 # https://docs.docker.com/compose/compose-file/compose-file-v3/
 # https://docs.docker.com/guides/dotnet/develop/
 
-version: '3.4'
+# version: '3.4'
+
+x-app-envs: &app-envs
+  ASPNETCORE_ENVIRONMENT: Development
+  ASPNETCORE_HTTP_PORTS: 8080
+  ASPNETCORE_HTTPS_PORTS: 8081
+
+x-app-aws-envs: &app-aws-envs
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+  AWS_SECRET_ACCESS_KEY: wJalrXUtn
 
 services:
 
@@ -24,11 +34,9 @@ services:
 
     auth.webapi:
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
-            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-            - ASPNETCORE_Kestrel__Certificates__Default__Password=123456 
+            << : *app-envs
+            ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
+            ASPNETCORE_Kestrel__Certificates__Default__Password: 123456 
         ports:
             - "8235:8080"
             - "8236:8081"
@@ -42,9 +50,7 @@ services:
 
     getway.webapi:
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
+            <<: *app-envs
         ports:
             - "8080:8080"
             - "8081:8081"
@@ -55,14 +61,9 @@ services:
 
     order.webapi:
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
-            - AWS_REGION=us-east-1
-            - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-            - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-            - EFI__CertificatePath=/home/app/.certs/efi-homologacao-883595.p12
-            - EFI__CertificatePassword=
+            <<: [*app-envs, *app-aws-envs]
+            EFI__CertificatePath: /home/app/.certs/efi-homologacao-883595.p12
+            EFI__CertificatePassword:
         ports:
             - "8888:8080"
             - "8881:8081"
@@ -77,12 +78,7 @@ services:
 
     cart.webapi:
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
-            - AWS_REGION=us-east-1
-            - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-            - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY  
+            <<: [*app-envs, *app-aws-envs]
         ports:
             - "8087:8080"
             - "8088:8081"
@@ -97,12 +93,7 @@ services:
          
     catalog.api:
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
-            - ASPNETCORE_HTTP_PORTS=8080
-            - ASPNETCORE_HTTPS_PORTS=8081
-            - AWS_REGION=us-east-1
-            - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-            - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+            <<: [*app-envs, *app-aws-envs]
         ports:
             - "8989:8080"
             - "8181:8081"
@@ -112,17 +103,20 @@ services:
 
     localstack:
         ports:
-          - "127.0.0.1:4566:4566"            # LocalStack Gateway
-          - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+          # "127.0.0.1:4566:4566"            # LocalStack Gateway
+          # "127.0.0.1:4510-4559:4510-4559"  # external services port range
+          - "4566:4566"            # LocalStack Gateway
+          - "4510-4559:4510-4559"  # external services port range
         environment:
+          << : *app-aws-envs
           # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
-          - DEBUG=${DEBUG:-1}
-          - SERVICES=s3,sqs,sns
-          - LOCALSTACK_HOST=localhost.localstack.cloud:4566
-          - AWS_REGION=us-east-1
-          - AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-          - AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-          - AWS_DEFAULT_OUTPUT=json
+          DEBUG: ${DEBUG:-1}
+          SERVICES: s3,sqs,sns
+          LOCALSTACK_HOST: localhost.localstack.cloud:4566
+          AWS_DEFAULT_OUTPUT: json
+          DISABLE_CORS_CHECK: 1
+          EXTRA_CORS_ALLOWED_ORIGINS: "https://app.localstack.cloud"
+          LOCALSTACK_AUTH_TOKEN: ls-TulAdasu-1920-LunI-8608-KUNeludEa3d9
         volumes:
           - "${LOCALSTACK_VOLUME_DIR:-./localstack}:/var/lib/localstack"
           - "/var/run/docker.sock:/var/run/docker.sock"
