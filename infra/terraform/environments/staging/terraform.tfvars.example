@@ -1,0 +1,9 @@
+# Copie este arquivo para "terraform.tfvars" (que e ignorado pelo git)
+# e preencha com o token real. Nunca commite o terraform.tfvars.
+#
+# Como gerar o token no Cloudflare:
+#   1. dash.cloudflare.com -> My Profile -> API Tokens -> Create Token
+#   2. Template "Edit zone DNS"
+#   3. Restrinja "Zone Resources" apenas ao dominio usado neste projeto
+
+cloudflare_api_token = "cole-o-token-aqui"

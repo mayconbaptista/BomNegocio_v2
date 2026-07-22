@@ -366,3 +366,12 @@ FodyWeavers.xsd
 volume/
 localstack/
 scripts/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
