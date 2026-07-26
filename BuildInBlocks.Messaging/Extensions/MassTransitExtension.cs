@@ -16,8 +16,6 @@ namespace BuildInBlocks.Messaging.Extensions
             var isMigration = Environment.GetCommandLineArgs()
                 .Any(arg => arg.Contains("migrations", StringComparison.OrdinalIgnoreCase));
 
-            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
-
             if (isMigration)
             {
                 services.AddMassTransit(x => { x.UsingInMemory(); });
@@ -36,7 +34,7 @@ namespace BuildInBlocks.Messaging.Extensions
             var AWS_REGION = configuration["AWS_REGION"] 
                 ?? throw new ArgumentNullException("Erro ao obter o AWS_REGION.");
 
-            var AWS_SERVICE_URL = configuration["AWS:ServiceURL"]
+            var AWS_SERVICE_URL = configuration["AWS_ENDPOINT_URL"]
                 ?? throw new ArgumentNullException("Erro ao obter o AWS_ServiceURL.");
 
             services.AddMassTransit(x =>

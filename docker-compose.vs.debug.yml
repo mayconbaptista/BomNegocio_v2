@@ -3,8 +3,6 @@
 # https://docs.docker.com/compose/compose-file/compose-file-v3/
 # https://docs.docker.com/guides/dotnet/develop/
 
-# version: '3.4'
-
 services:
 
     auth.webapi:

@@ -2,17 +2,24 @@
 # https://docs.docker.com/compose/compose-file/compose-file-v3/
 # https://docs.docker.com/guides/dotnet/develop/
 
-# version: '3.4'
-
 x-app-envs: &app-envs
+  Logging__LogLevel__Default: Warning
   ASPNETCORE_ENVIRONMENT: Development
   ASPNETCORE_HTTP_PORTS: 8080
   ASPNETCORE_HTTPS_PORTS: 8081
 
 x-app-aws-envs: &app-aws-envs
+  AWS_ENDPOINT_URL: http://localstack-bn:4566
   AWS_REGION: us-east-1
   AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
   AWS_SECRET_ACCESS_KEY: wJalrXUtn
+
+x-app-authentication: &app-authentication
+  Authentication__Schemes__Bearer__ValidAudience: https://localhost
+  Authentication__Schemes__Bearer__ValidIssuer: bn-auth-sso
+  Authentication__Schemes__Bearer__IssuerSigningKey: 15ddb0a7b6b0d2e5fad0c191c4cb96f8c95301e3a05c55fa352a53af7da7ae8b
+  Authentication__Schemes__Bearer__RefreshLifeTimeInMinutes: 1440
+  Authentication__Schemes__Bearer__TokenLifeTimeInMinutes: 1440
 
 services:
 
@@ -34,7 +41,7 @@ services:
 
     auth.webapi:
         environment:
-            << : *app-envs
+            << : [*app-envs, *app-authentication]
             ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
             ASPNETCORE_Kestrel__Certificates__Default__Password: 123456 
         ports:
@@ -61,7 +68,7 @@ services:
 
     order.webapi:
         environment:
-            <<: [*app-envs, *app-aws-envs]
+            <<: [*app-envs, *app-aws-envs, *app-authentication]
             EFI__CertificatePath: /home/app/.certs/efi-homologacao-883595.p12
             EFI__CertificatePassword:
         ports:
@@ -78,7 +85,7 @@ services:
 
     cart.webapi:
         environment:
-            <<: [*app-envs, *app-aws-envs]
+            <<: [*app-envs, *app-aws-envs, *app-authentication]
         ports:
             - "8087:8080"
             - "8088:8081"
@@ -93,7 +100,7 @@ services:
          
     catalog.api:
         environment:
-            <<: [*app-envs, *app-aws-envs]
+            <<: [*app-envs, *app-aws-envs, *app-authentication]
         ports:
             - "8989:8080"
             - "8181:8081"
@@ -102,9 +109,9 @@ services:
             - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
 
     localstack:
+        image: localstack/localstack:stable
+        container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-bn}"
         ports:
-          # "127.0.0.1:4566:4566"            # LocalStack Gateway
-          # "127.0.0.1:4510-4559:4510-4559"  # external services port range
           - "4566:4566"            # LocalStack Gateway
           - "4510-4559:4510-4559"  # external services port range
         environment:
