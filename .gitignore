@@ -375,3 +375,7 @@ scripts/
 !*.tfvars.example
 crash.log
 crash.*.log
+
+# Docker Compose secrets (infra sem projeto .NET associado)
+.env
+!.env.example
