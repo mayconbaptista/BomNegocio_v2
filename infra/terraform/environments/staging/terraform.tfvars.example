@@ -1,9 +1,9 @@
-# Copie este arquivo para "terraform.tfvars" (que e ignorado pelo git)
-# e preencha com o token real. Nunca commite o terraform.tfvars.
-#
-# Como gerar o token no Cloudflare:
-#   1. dash.cloudflare.com -> My Profile -> API Tokens -> Create Token
-#   2. Template "Edit zone DNS"
-#   3. Restrinja "Zone Resources" apenas ao dominio usado neste projeto
+budget_email = "seu-email@example.com"
 
-cloudflare_api_token = "cole-o-token-aqui"
+# Confirme no console quais classes estao elegiveis na sua conta antes do apply.
+instance_type      = "t4g.small"
+db_instance_class = "db.t4g.micro"
+
+# A senha nao deve entrar neste arquivo. Forneca somente no processo:
+# PowerShell: $env:TF_VAR_db_master_password = "..."
+# Bash:       export TF_VAR_db_master_password="..."

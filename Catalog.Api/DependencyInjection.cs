@@ -1,4 +1,4 @@
-﻿using Amazon.S3;
+using Amazon.S3;
 using Catalog.Api.Configuration;
 using Catalog.Api.Data;
 using Catalog.Api.Data.Interfaces;
@@ -12,8 +12,8 @@ namespace Catalog.Api
 
         public static IServiceCollection AddApiServices (this IServiceCollection services, IConfiguration configuration)
         {
-            var connection = configuration.GetConnectionString("DefaultConnection") 
-                ?? throw new ArgumentNullException("Error ao obter a string de conecção.");
+            var connection = configuration.GetConnectionString("Database")
+                ?? throw new InvalidOperationException("Connection string 'Database' was not configured.");
 
             services.AddDbContext<CatalogContext>((sp, options) =>
             {

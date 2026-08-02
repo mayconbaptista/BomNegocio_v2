@@ -1,4 +1,4 @@
-﻿
+
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -19,8 +19,8 @@ namespace Order.Infrastructure
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             #region "Persistence"
-            var connection = configuration.GetConnectionString("DbConnection")
-                ?? throw new ArgumentNullException("DbConnection is not found in the configuration file.");
+            var connection = configuration.GetConnectionString("Database")
+                ?? throw new InvalidOperationException("Connection string 'Database' was not configured.");
 
             services.AddScoped<DispatchDomainEventsInterceptor>();
             services.AddScoped<AuditableEntityInterceptor>();

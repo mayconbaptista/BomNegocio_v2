@@ -1,0 +1,199 @@
+name: bneshop-staging
+
+# Arquivo autocontido para a EC2. Nao e mesclado automaticamente pelo Visual
+# Studio, portanto o fluxo local atual em docker-compose.override.yml permanece.
+
+x-api-environment: &api-environment
+  ASPNETCORE_ENVIRONMENT: Staging
+  ASPNETCORE_HTTP_PORTS: 8080
+  AWS_REGION: ${AWS_REGION:-us-east-1}
+
+x-authentication: &authentication
+  Authentication__Schemes__Bearer__ValidAudience: ${AUTH_VALID_AUDIENCE:?Defina AUTH_VALID_AUDIENCE}
+  Authentication__Schemes__Bearer__ValidIssuer: ${AUTH_VALID_ISSUER:?Defina AUTH_VALID_ISSUER}
+  Authentication__Schemes__Bearer__IssuerSigningKey: ${AUTH_SIGNING_KEY:?Defina AUTH_SIGNING_KEY}
+  Authentication__Schemes__Bearer__RefreshLifeTimeInMinutes: ${AUTH_REFRESH_MINUTES:-1440}
+  Authentication__Schemes__Bearer__TokenLifeTimeInMinutes: ${AUTH_TOKEN_MINUTES:-60}
+
+x-container-defaults: &container-defaults
+  init: true
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  traefik:
+    <<: *container-defaults
+    image: traefik:v3.5
+    mem_limit: 96m
+    mem_reservation: 48m
+    memswap_limit: 96m
+    cpus: 0.25
+    pids_limit: 100
+    command:
+      - --api.dashboard=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=bneshop-edge
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:?Defina ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:?Defina CF_DNS_API_TOKEN}
+    ports:
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/letsencrypt
+    networks:
+      - edge
+    security_opt:
+      - no-new-privileges:true
+
+  getway.webapi:
+    <<: *container-defaults
+    image: ${GATEWAY_IMAGE:-bneshop/gateway:staging}
+    build:
+      context: .
+      dockerfile: Getway.WebApi/Dockerfile
+    mem_limit: 160m
+    mem_reservation: 80m
+    memswap_limit: 160m
+    cpus: 0.35
+    pids_limit: 150
+    environment:
+      <<: *api-environment
+    expose:
+      - "8080"
+    # Acesso administrativo somente pelo loopback da EC2 + tunel SSM.
+    ports:
+      - "127.0.0.1:18080:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bneshop-api.rule=Host(`${BNSHOP_API_HOST:?Defina BNSHOP_API_HOST}`)
+      - traefik.http.routers.bneshop-api.entrypoints=websecure
+      - traefik.http.routers.bneshop-api.tls=true
+      - traefik.http.routers.bneshop-api.tls.certresolver=letsencrypt
+      - traefik.http.services.bneshop-api.loadbalancer.server.port=8080
+      - traefik.docker.network=bneshop-edge
+    depends_on:
+      - auth.webapi
+      - cart.webapi
+      - catalog.api
+      - order.webapi
+    networks:
+      - edge
+      - backend
+
+  auth.webapi:
+    <<: *container-defaults
+    image: ${AUTH_IMAGE:-bneshop/auth:staging}
+    build:
+      context: .
+      dockerfile: Auth.WebApi/Dockerfile
+    mem_limit: 224m
+    mem_reservation: 96m
+    memswap_limit: 224m
+    cpus: 0.40
+    pids_limit: 200
+    environment:
+      <<: [*api-environment, *authentication]
+      ConnectionStrings__Database: ${AUTH_DB_CONNECTION:?Defina AUTH_DB_CONNECTION}
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:18235:8080"
+    networks:
+      backend:
+        aliases:
+          - auth.api
+
+  cart.webapi:
+    <<: *container-defaults
+    image: ${CART_IMAGE:-bneshop/cart:staging}
+    build:
+      context: .
+      dockerfile: Cart.WebApi/Dockerfile
+    mem_limit: 256m
+    mem_reservation: 112m
+    memswap_limit: 256m
+    cpus: 0.45
+    pids_limit: 200
+    environment:
+      <<: [*api-environment, *authentication]
+      ConnectionStrings__Database: ${CART_DB_CONNECTION:?Defina CART_DB_CONNECTION}
+      GrpcSettings__DiscountUrl: http://catalog.api:5052
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:18087:8080"
+    networks:
+      backend:
+        aliases:
+          - cart.api
+
+  catalog.api:
+    <<: *container-defaults
+    image: ${CATALOG_IMAGE:-bneshop/catalog:staging}
+    build:
+      context: .
+      dockerfile: Catalog.Api/Dockerfile
+    mem_limit: 320m
+    mem_reservation: 144m
+    memswap_limit: 320m
+    cpus: 0.55
+    pids_limit: 250
+    environment:
+      <<: [*api-environment, *authentication]
+      ConnectionStrings__Database: ${CATALOG_DB_CONNECTION:?Defina CATALOG_DB_CONNECTION}
+      ProductConfig__AwsServiceS3Config__BucketName: ${CATALOG_BUCKET:?Defina CATALOG_BUCKET}
+    expose:
+      - "8080"
+      - "5052"
+    ports:
+      - "127.0.0.1:18989:8080"
+    networks:
+      backend:
+        aliases:
+          - catalog.api
+
+  order.webapi:
+    <<: *container-defaults
+    image: ${ORDER_IMAGE:-bneshop/order:staging}
+    build:
+      context: .
+      dockerfile: Order.WebApi/Dockerfile
+    mem_limit: 320m
+    mem_reservation: 144m
+    memswap_limit: 320m
+    cpus: 0.55
+    pids_limit: 250
+    environment:
+      <<: [*api-environment, *authentication]
+      ConnectionStrings__Database: ${ORDER_DB_CONNECTION:?Defina ORDER_DB_CONNECTION}
+      EFI__CertificatePath: /run/secrets/efi-certificate.p12
+      EFI__CertificatePassword: ${EFI_CERTIFICATE_PASSWORD:?Defina EFI_CERTIFICATE_PASSWORD}
+    volumes:
+      - ${EFI_CERTIFICATE_HOST_PATH:?Defina EFI_CERTIFICATE_HOST_PATH}:/run/secrets/efi-certificate.p12:ro
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:18888:8080"
+    networks:
+      backend:
+        aliases:
+          - order.api
+
+networks:
+  edge:
+    name: bneshop-edge
+  backend:
+    name: bneshop-backend
+
+volumes:
+  traefik-certificates:

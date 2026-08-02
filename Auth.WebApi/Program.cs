@@ -21,8 +21,7 @@ try
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwagger(typeof(Program).Assembly);
-
-    // DICA: Auth deve vir antes do Identity em alguns cen·rios, mas aqui est· ok
+    // DICA: Auth deve vir antes do Identity em alguns cen√°rios, mas aqui est√° ok
     builder.Services.AddAuthorization(builder.Configuration);
     builder.Services.AddAuthentication(builder.Configuration);
 
@@ -30,8 +29,8 @@ try
         .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();
 
-    var connection = builder.Configuration.GetConnectionString("AuthConnection")
-        ?? throw new ArgumentNullException("Connection string not found");
+    var connection = builder.Configuration.GetConnectionString("Database")
+        ?? throw new InvalidOperationException("Connection string 'Database' was not configured.");
 
     builder.Services.AddDbContext<AuthDbContext>((sp, options) =>
     {

@@ -15,7 +15,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Configuration.AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: false, reloadOnChange: true);
+builder
+    .Configuration
+    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: false)
+    .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddOcelot(builder.Configuration);
 

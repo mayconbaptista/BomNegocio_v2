@@ -28,9 +28,9 @@ resource "aws_internet_gateway" "main" {
 # (proximo passo) e quem restringe o acesso externo so as portas 80/443.
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block               = var.public_subnet_cidr
-  availability_zone        = var.availability_zone
-  map_public_ip_on_launch  = true
+  cidr_block              = var.public_subnet_cidr
+  availability_zone       = var.availability_zones[0]
+  map_public_ip_on_launch = true
 
   tags = {
     Name        = "${var.project_name}-${var.environment}-public-subnet"
@@ -56,4 +56,21 @@ resource "aws_route_table" "public" {
 resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
+}
+
+# O RDS exige um DB subnet group cobrindo pelo menos duas AZs, mesmo quando a
+# instancia e Single-AZ. Essas subnets nao recebem rota para o Internet Gateway.
+resource "aws_subnet" "database" {
+  count = 2
+
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.private_db_subnet_cidrs[count.index]
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-db-${count.index + 1}"
+    Environment = var.environment
+    Tier        = "database"
+  }
 }

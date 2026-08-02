@@ -1,17 +1,16 @@
 terraform {
-  required_version = ">= 1.5"
+  required_version = ">= 1.11, < 2.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
     }
   }
 
-  # Estado local por enquanto (suficiente para estudo/single-user).
-  # Se no futuro mais de uma pessoa/maquina for aplicar este Terraform,
-  # trocar para um backend remoto (S3 + DynamoDB lock) evita que dois
-  # applies simultaneos corrompam o state.
+  # Estado local por enquanto. Antes de CI/CD, migrar para backend S3 com
+  # encrypt=true, bucket versionado e use_lockfile=true. O locking via
+  # DynamoDB foi depreciado pelo Terraform e nao deve ser adotado em projeto novo.
 }
 
 provider "aws" {

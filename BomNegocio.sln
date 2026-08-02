@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11505.172 d18.3
+VisualStudioVersion = 18.3.11505.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{28BE1BA0-9A70-48E4-A61B-F11BC25BF65D}"
 EndProject
@@ -56,6 +56,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		.editorconfig = .editorconfig
 		.env = .env
 		.env.example = .env.example
+		.env.staging = .env.staging
+		.env.staging.example = .env.staging.example
+		AGENTS.md = AGENTS.md
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject

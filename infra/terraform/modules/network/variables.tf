@@ -20,7 +20,22 @@ variable "public_subnet_cidr" {
   default     = "10.0.1.0/24"
 }
 
-variable "availability_zone" {
-  description = "AZ da subnet publica. Uma unica AZ e suficiente pois so existe 1 instancia EC2"
-  type        = string
+variable "availability_zones" {
+  description = "Duas AZs: a primeira hospeda EC2/RDS e ambas compoem o DB subnet group"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.availability_zones) >= 2
+    error_message = "Informe pelo menos duas availability zones."
+  }
+}
+
+variable "private_db_subnet_cidrs" {
+  description = "CIDRs das subnets privadas usadas pelo DB subnet group"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.private_db_subnet_cidrs) >= 2
+    error_message = "Informe pelo menos dois CIDRs privados para o RDS."
+  }
 }

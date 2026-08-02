@@ -115,3 +115,47 @@ Você pode testar via o front end da aplicação, acesse o link do repositório 
 ### Migration
 
 Add-Migration NomeDaSuaMigration -Project "NomeDoSeuProjeto" -StartupProject "NomeDoProjetoPrincipal" -OutputDir "Pasta/Subpasta"
+
+## Staging na AWS
+
+O staging usa `docker-compose.staging.yml`. Somente o Traefik publica a porta
+443. As portas administrativas dos containers sao vinculadas a `127.0.0.1` da
+EC2 e, portanto, nao ficam acessiveis pela internet.
+
+Para abrir um Swagger por tunel SSM no Windows:
+
+```powershell
+.\infra\tools\Open-StagingSwagger.ps1 `
+  -InstanceId i-0123456789abcdef0 `
+  -Service catalog
+```
+
+Com a sessao aberta, acesse `http://localhost:18989`. Portas padrao:
+
+| Servico | Porta local/remota |
+|---|---:|
+| Gateway | 18080 |
+| Auth | 18235 |
+| Cart | 18087 |
+| Catalog | 18989 |
+| Order | 18888 |
+
+Pre-requisitos locais: AWS CLI, Session Manager plugin e permissao IAM para
+`ssm:StartSession`. Nenhuma porta adicional deve ser aberta no Security Group.
+
+### Terraform
+
+O ambiente exige Terraform 1.11+ e AWS Provider 6.x para que senhas possam usar
+argumentos write-only e nao sejam persistidas no state.
+
+```powershell
+Set-Location infra\terraform\environments\staging
+Copy-Item terraform.tfvars.example terraform.tfvars
+$env:TF_VAR_db_master_password = '<senha-forte-temporaria>'
+terraform init
+terraform plan
+terraform apply
+```
+
+Antes do `apply`, confirme a elegibilidade Free Tier das classes EC2/RDS na sua
+conta. AWS Budgets alerta custos, mas nao e um bloqueio rigido de cobranca.

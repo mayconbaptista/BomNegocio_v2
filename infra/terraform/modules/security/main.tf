@@ -32,6 +32,31 @@ resource "aws_security_group" "ec2" {
   }
 }
 
+resource "aws_security_group" "rds" {
+  name        = "${var.project_name}-${var.environment}-rds-sg"
+  description = "PostgreSQL acessivel somente pela EC2 do BnShop"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "PostgreSQL vindo da EC2"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-rds-sg"
+  }
+}
+
 # Trust policy da IAM Role: apenas o servico EC2 pode assumi-la.
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
@@ -60,32 +85,67 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# Parametro SecureString com o token do Cloudflare. E criptografado com
-# a KMS key default da conta - o valor nunca aparece em texto plano no
-# state nem em nenhum output. O Traefik le esse valor no boot da EC2.
-resource "aws_ssm_parameter" "cloudflare_api_token" {
-  name  = "/${var.project_name}/${var.environment}/cloudflare_api_token"
-  type  = "SecureString"
-  value = var.cloudflare_api_token
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-# Policy minima: a role so pode ler ESSE parametro especifico, nunca
-# qualquer parametro da conta (principio do menor privilegio).
-data "aws_iam_policy_document" "read_cloudflare_token" {
+data "aws_iam_policy_document" "application_runtime" {
   statement {
-    actions   = ["ssm:GetParameter"]
-    resources = [aws_ssm_parameter.cloudflare_api_token.arn]
+    sid       = "ReadStagingParameters"
+    actions   = ["ssm:GetParameter", "ssm:GetParameters"]
+    resources = ["arn:aws:ssm:${var.aws_region}:${var.aws_account_id}:parameter${var.parameter_path_prefix}/*"]
+  }
+
+  statement {
+    sid = "CatalogBucket"
+    actions = [
+      "s3:ListBucket"
+    ]
+    resources = [var.catalog_bucket_arn]
+  }
+
+  statement {
+    sid = "CatalogObjects"
+    actions = [
+      "s3:GetObject", "s3:PutObject", "s3:DeleteObject"
+    ]
+    resources = ["${var.catalog_bucket_arn}/*"]
+  }
+
+  statement {
+    sid       = "ReadPrivateArtifacts"
+    actions   = ["s3:GetObject"]
+    resources = ["${var.private_bucket_arn}/efi/*"]
+  }
+
+  # CreateQueue/CreateTopic precisam de Resource="*" porque o ARN ainda nao
+  # existe. As demais operacoes ficam limitadas ao prefixo de staging.
+  statement {
+    sid       = "CreateMassTransitTopology"
+    actions   = ["sqs:CreateQueue", "sns:CreateTopic"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "UseMassTransitQueues"
+    actions = [
+      "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:GetQueueUrl",
+      "sqs:ReceiveMessage", "sqs:SendMessage", "sqs:SetQueueAttributes",
+      "sqs:TagQueue"
+    ]
+    resources = ["arn:aws:sqs:${var.aws_region}:${var.aws_account_id}:${var.environment}-*"]
+  }
+
+  statement {
+    sid = "UseMassTransitTopics"
+    actions = [
+      "sns:GetTopicAttributes", "sns:ListSubscriptionsByTopic", "sns:Publish",
+      "sns:SetTopicAttributes", "sns:Subscribe", "sns:TagResource", "sns:Unsubscribe"
+    ]
+    resources = ["arn:aws:sns:${var.aws_region}:${var.aws_account_id}:${var.environment}-*"]
   }
 }
 
-resource "aws_iam_role_policy" "read_cloudflare_token" {
-  name   = "${var.project_name}-${var.environment}-read-cloudflare-token"
+resource "aws_iam_role_policy" "application_runtime" {
+  name   = "${var.project_name}-${var.environment}-runtime"
   role   = aws_iam_role.ec2.id
-  policy = data.aws_iam_policy_document.read_cloudflare_token.json
+  policy = data.aws_iam_policy_document.application_runtime.json
 }
 
 # Instance profile: e o que efetivamente "anexa" a role a uma EC2.

@@ -6,6 +6,7 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+EXPOSE 5052
 
 
 # Esta fase é usada para compilar o projeto de serviço
@@ -15,6 +16,7 @@ WORKDIR /src
 COPY ["Catalog.Api/Catalog.Api.csproj", "Catalog.Api/"]
 COPY ["BuildBlocks.WebApi/BuildBlocks.WebApi.csproj", "BuildBlocks.WebApi/"]
 COPY ["BuildBlocks.Domain/BuildBlocks.Domain.csproj", "BuildBlocks.Domain/"]
+COPY ["BuildInBlocks.Messaging/BuildInBlocks.Messaging.csproj", "BuildInBlocks.Messaging/"]
 RUN dotnet restore "./Catalog.Api/Catalog.Api.csproj"
 COPY . .
 WORKDIR "/src/Catalog.Api"

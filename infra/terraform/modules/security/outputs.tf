@@ -8,7 +8,12 @@ output "iam_instance_profile_name" {
   value       = aws_iam_instance_profile.ec2.name
 }
 
-output "cloudflare_token_parameter_name" {
-  description = "Nome do parametro SSM; o user_data da EC2 busca o valor por este nome no boot"
-  value       = aws_ssm_parameter.cloudflare_api_token.name
+output "iam_role_name" {
+  description = "Nome da IAM Role anexada a EC2"
+  value       = aws_iam_role.ec2.name
+}
+
+output "rds_security_group_id" {
+  description = "Security Group privado do RDS"
+  value       = aws_security_group.rds.id
 }

@@ -31,9 +31,6 @@ try
     builder.Services.AddGrpcClient<ProductGRPC.ProductGRPCClient>(options =>
     {
         options.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
-    }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-    {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
     });
 
     builder.Services.AddMessageBroker(builder.Configuration);

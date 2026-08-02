@@ -42,7 +42,7 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Cart.Api - V1");
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog.Api - V1");
             options.RoutePrefix = string.Empty;
         });
 
@@ -52,7 +52,6 @@ try
             await app.ApplyMigrations(); 
         }
     }
-
 
     app.UseExceptionHandler(op => { });
 

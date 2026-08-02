@@ -13,8 +13,27 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "cloudflare_api_token" {
-  description = "Token de API do Cloudflare (permissao minima: Zone:DNS:Edit no dominio usado), consumido pelo Traefik no desafio DNS-01 do Let's Encrypt"
+variable "aws_region" {
+  description = "Regiao usada para construir ARNs de SQS/SNS"
   type        = string
-  sensitive   = true
+}
+
+variable "aws_account_id" {
+  description = "ID da conta AWS"
+  type        = string
+}
+
+variable "parameter_path_prefix" {
+  description = "Prefixo dos parametros que a EC2 pode ler"
+  type        = string
+}
+
+variable "catalog_bucket_arn" {
+  description = "ARN do bucket de imagens do catalogo"
+  type        = string
+}
+
+variable "private_bucket_arn" {
+  description = "ARN do bucket privado de artefatos/certificados"
+  type        = string
 }

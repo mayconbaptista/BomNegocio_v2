@@ -366,6 +366,8 @@ FodyWeavers.xsd
 volume/
 localstack/
 scripts/
+*.md
+!README.md
 
 # Terraform
 **/.terraform/*
@@ -379,3 +381,5 @@ crash.*.log
 # Docker Compose secrets (infra sem projeto .NET associado)
 .env
 !.env.example
+.env.staging
+!.env.staging.example

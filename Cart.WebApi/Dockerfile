@@ -14,7 +14,6 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Cart.WebApi/Cart.WebApi.csproj", "Cart.WebApi/"]
 COPY ["BuildBlocks.WebApi/BuildBlocks.WebApi.csproj", "BuildBlocks.WebApi/"]
-COPY ["BuildInBlocks.CQRS/BuildInBlocks.CQRS.csproj", "BuildInBlocks.CQRS/"]
 COPY ["BuildBlocks.Domain/BuildBlocks.Domain.csproj", "BuildBlocks.Domain/"]
 COPY ["BuildInBlocks.Messaging/BuildInBlocks.Messaging.csproj", "BuildInBlocks.Messaging/"]
 RUN dotnet restore "./Cart.WebApi/Cart.WebApi.csproj"

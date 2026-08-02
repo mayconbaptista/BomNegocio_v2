@@ -3,9 +3,29 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
+      "serviceActions": {
+        "auth.webapi": "StartDebugging",
+        "bom_negocio.db": "StartWithoutDebugging",
+        "cart.webapi": "StartDebugging",
+        "catalog.api": "StartDebugging",
+        "getway.webapi": "StartDebugging",
+        "localstack": "StartWithoutDebugging",
+        "order.webapi": "StartDebugging",
+        "traefik.local": "StartWithoutDebugging"
+      }
+    },
+    "geral": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
       "composeProfile": {
         "includes": [
-          "vs_debug"
+          "localstack",
+          "order_api",
+          "postgresql_db",
+          "auth_api",
+          "cart_api",
+          "catalog_api",
+          "getway_webapi"
         ]
       }
     }

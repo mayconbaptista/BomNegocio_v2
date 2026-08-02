@@ -69,9 +69,9 @@ public sealed class CreateOrderCommandHandler
             billingAddress,
             payment,
             Delivery.Create(
-                (DeliveryType)request.Delivery.Type,
-                request.Delivery.EstimatedDeliveryDate,
-                request.Delivery.Price)
+                DeliveryType.Standard,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(45)),
+                10)
             );
 
         return entt;

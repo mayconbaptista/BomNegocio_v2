@@ -6,12 +6,12 @@ x-app-envs: &app-envs
   Logging__LogLevel__Default: Warning
   ASPNETCORE_ENVIRONMENT: Development
   ASPNETCORE_HTTP_PORTS: 8080
-  ASPNETCORE_HTTPS_PORTS: 8081
 
 x-app-aws-envs: &app-aws-envs
   AWS_REGION: ${AWS_REGION:-us-east-1}
   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+  AWS_ENDPOINT_URL: http://localstack-bn:4566
 
 x-app-authentication: &app-authentication
   Authentication__Schemes__Bearer__ValidAudience: https://localhost
@@ -22,27 +22,44 @@ x-app-authentication: &app-authentication
 
 services:
 
-    bom_negocio.db:
+    # Opcional: habilite o profile traefik_local para testar localmente o mesmo
+    # salto de borda usado em staging: Traefik -> Ocelot. O Visual Studio nao
+    # inicia este container sem o profile, portanto o fluxo atual e preservado.
+    traefik.local:
+        command:
+            - --api.dashboard=false
+            - --providers.docker=true
+            - --providers.docker.exposedbydefault=false
+            - --entrypoints.web.address=:80
+        ports:
+            - "8090:80"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        security_opt:
+            - no-new-privileges:true
+
+    bom_negocio.db: # somente para desenvolvimento local, nao usar em producao
         environment:
             POSTGRES_DB: ${POSTGRES_DB:-catalog}
             POSTGRES_USER: ${POSTGRES_USER:-catalog}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         ports:
             - "5432:5432"
-            - "5433:5433"
         healthcheck:
-            test: ["CMD", "pg_isready"]
+            test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-catalog}"]
             interval: 10s
             timeout: 5s
             retries: 5
         volumes:
             - db-data:/var/lib/postgresql/data
+            - ./scripts/postgres/01-create-databases.sql:/docker-entrypoint-initdb.d/01-create-databases.sql:ro
 
     auth.webapi:
         environment:
             << : [*app-envs, *app-authentication]
             ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
             ASPNETCORE_Kestrel__Certificates__Default__Password: ${DEV_CERT_PASSWORD}
+            ConnectionStrings__Database: ${AUTH_DB_CONNECTION:?Connection string AUTH_DB_CONNECTION not found.}
         ports:
             - "8235:8080"
             - "8236:8081"
@@ -53,6 +70,7 @@ services:
         depends_on:
             bom_negocio.db:
                 condition: service_healthy
+        profiles: ["auth_api"]
 
     getway.webapi:
         environment:
@@ -64,12 +82,21 @@ services:
         volumes:
             - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
             - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.bnshop-local.rule=Host(`localhost`) || Host(`api.bnshop.localhost`)
+            - traefik.http.routers.bnshop-local.entrypoints=web
+            - traefik.http.services.bnshop-local.loadbalancer.server.port=8080
+        profiles: ["getway_webapi"]
 
     order.webapi:
         environment:
             <<: [*app-envs, *app-aws-envs, *app-authentication]
             EFI__CertificatePath: /home/app/.certs/efi-homologacao-883595.p12
             EFI__CertificatePassword: ${EFI_CERTIFICATE_PASSWORD}
+            EFI__Credentials__ClientId: ${EFI_CREDENTIALS_CLIENT_ID}
+            EFI__Credentials__ClientSecret: ${EFI_CREDENTIALS_CLIENT_SECRET}
+            ConnectionStrings__Database: ${ORDER_DB_CONNECTION:?String de conexao ORDER_DB_CONNECTION nao encontrada.}
         ports:
             - "8888:8080"
             - "8881:8081"
@@ -81,10 +108,13 @@ services:
         depends_on:
             bom_negocio.db:
                 condition: service_healthy
+        profiles: ["order_api"]
 
     cart.webapi:
         environment:
             <<: [*app-envs, *app-aws-envs, *app-authentication]
+            ConnectionStrings__Database: ${CART_DB_CONNECTION:?String de conexao CART_DB_CONNECTION nao encontrada.}
+            GrpcSettings__DiscountUrl: http://catalog.api:5052
         ports:
             - "8087:8080"
             - "8088:8081"
@@ -96,16 +126,20 @@ services:
         depends_on:
             bom_negocio.db:
                 condition: service_healthy
+        profiles: ["cart_api"]
          
     catalog.api:
         environment:
             <<: [*app-envs, *app-aws-envs, *app-authentication]
+            ConnectionStrings__Database: ${CATALOG_DB_CONNECTION:?String de conexao CATALOG_DB_CONNECTION nao encontrada.}
         ports:
             - "8989:8080"
+            - "5052:5052"
             - "8181:8081"
         volumes:
             - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
             - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+        profiles: ["catalog_api"]
 
     localstack:
         image: localstack/localstack:stable
@@ -127,8 +161,7 @@ services:
           - "${LOCALSTACK_VOLUME_DIR:-./localstack}:/var/lib/localstack"
           - "/var/run/docker.sock:/var/run/docker.sock"
           - "./scripts/localstack:/etc/localstack/init/ready.d"
-        profiles: ["vs_debug"]
+        profiles: ["localstack"]
         
 volumes:
     db-data:
-
