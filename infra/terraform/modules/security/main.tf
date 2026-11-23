@@ -1,25 +1,14 @@
-# Security Group da EC2. So HTTPS (443) e liberado para a internet.
-# A porta 80 fica fechada porque a validacao do certificado usa o
-# desafio DNS-01 do Let's Encrypt (via API do Cloudflare), nao HTTP-01
-# - entao nao ha necessidade de expor a 80 so para o ACME responder.
-# SSH (22) tambem nao e liberado: o acesso administrativo e via SSM
-# Session Manager, que usa apenas conexao de SAIDA (egress), entao nao
-# precisa de nenhuma porta de entrada aberta para gestao da instancia.
+# Security Group da EC2 SEM nenhuma regra de entrada (ADR-012).
+# - API: chega pelo Cloudflare Tunnel, uma conexao de SAIDA aberta pelo
+#   cloudflared. Scanner nenhum encontra porta aberta, nem do CloudFront.
+# - Administracao: SSM Session Manager, tambem so conexao de saida (sem SSH).
 resource "aws_security_group" "ec2" {
   name        = "${var.project_name}-${var.environment}-ec2-sg"
-  description = "Permite apenas HTTPS de entrada; gestao via SSM Session Manager"
+  description = "Sem entrada: API via Cloudflare Tunnel, gestao via SSM"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "HTTPS publico (Gateway atras do Traefik)"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
-    description = "Saida livre: pull de imagens, SSM, API do Cloudflare, etc"
+    description = "Saida livre: Cloudflare Tunnel, ECR, SSM, SQS/SNS, S3 e RDS"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -139,6 +128,30 @@ data "aws_iam_policy_document" "application_runtime" {
       "sns:SetTopicAttributes", "sns:Subscribe", "sns:TagResource", "sns:Unsubscribe"
     ]
     resources = ["arn:aws:sns:${var.aws_region}:${var.aws_account_id}:${var.environment}-*"]
+  }
+
+  # GetAuthorizationToken nao suporta permissao por recurso.
+  statement {
+    sid       = "EcrLogin"
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "EcrPull"
+    actions = [
+      "ecr:BatchCheckLayerAvailability", "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer"
+    ]
+    resources = var.ecr_repository_arns
+  }
+
+  # O pipeline publica docker-compose + deploy.sh versionados por commit em
+  # s3://<private>/deploy/<sha>/. A EC2 so le esse prefixo.
+  statement {
+    sid       = "ReadDeployBundles"
+    actions   = ["s3:GetObject"]
+    resources = ["${var.private_bucket_arn}/deploy/*"]
   }
 }
 

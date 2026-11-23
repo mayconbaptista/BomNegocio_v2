@@ -10,6 +10,12 @@ namespace BuildInBlocks.Messaging.Extensions
 {
     public static class MassTransitExtension
     {
+        // Long polling: o ReceiveMessage fica "pendurado" no SQS por ate 20 s
+        // (maximo permitido) e retorna IMEDIATAMENTE quando chega mensagem.
+        // O default do MassTransit e 3 s: fila vazia = ~20 requests/min por
+        // loop de recepcao (~876 mil/mes, cobrados). Com 20 s caem para
+        // ~3/min, sem aumentar a latencia de entrega.
+        private const ushort SqsLongPollingSeconds = 20;
 
         public static IServiceCollection AddMessageBroker(this IServiceCollection services, IConfiguration configuration, Assembly? consumer = null)
         {
@@ -40,8 +46,21 @@ namespace BuildInBlocks.Messaging.Extensions
                     x.AddConsumers(consumer);
                 }
 
+                // Aplica-se a cada endpoint criado pelo ConfigureEndpoints
+                // (uma fila por consumer).
+                x.AddConfigureEndpointsCallback((_, _, endpoint) =>
+                {
+                    if (endpoint is IAmazonSqsReceiveEndpointConfigurator sqs)
+                    {
+                        sqs.WaitTimeSeconds = SqsLongPollingSeconds;
+                    }
+                });
+
                 x.UsingAmazonSqs((context, cfg) =>
                 {
+                    // Fila temporaria do proprio bus (request/response).
+                    cfg.WaitTimeSeconds = SqsLongPollingSeconds;
+
                     cfg.Host(awsRegion.Trim(), h =>
                     {
                         if (!environment.Equals("Production", StringComparison.OrdinalIgnoreCase))

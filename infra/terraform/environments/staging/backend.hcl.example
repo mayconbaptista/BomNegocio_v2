@@ -1,0 +1,6 @@
+# Copie para backend.hcl (ignorado pelo git) e ajuste o account id.
+bucket       = "bnshop-tfstate-<ACCOUNT_ID>"
+key          = "staging/terraform.tfstate"
+region       = "us-east-2"
+encrypt      = true
+use_lockfile = true

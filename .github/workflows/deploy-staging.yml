@@ -1,0 +1,186 @@
+name: Deploy staging (backend)
+
+# Settings > Secrets and variables > Actions
+#   Secrets (gerados por infra/scripts/New-GitHubDeployKey.ps1, usuario
+#   terraform output github_backend_user):
+#     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+#   Variables (valores do `terraform output`; nenhum deles e segredo):
+#     PRIVATE_BUCKET   -> private_bucket
+#     EC2_INSTANCE_ID  -> instance_id
+#     DB_INSTANCE_ID   -> rds_instance_id
+#
+# Sem OIDC: a SCP do Free Tier da nova experiencia da AWS nega a criacao do
+# provedor OIDC (ADR-015). Por isso access key de um usuario com o minimo.
+#
+# O backend fica ligado em dias uteis 8h-20h (agenda do EventBridge). Um
+# deploy fora desse horario LIGA o ambiente, publica, valida e DESLIGA de
+# novo: o pipeline sempre funciona e o ambiente fica como estava.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.proto"
+      - "**/Dockerfile"
+      - "**/appsettings*.json"
+      - "**/ocelot*.json"
+      - "Directory.Build.props"
+      - "docker-compose.staging.yml"
+      - "deploy/staging/**"
+      - ".github/workflows/deploy-staging.yml"
+
+permissions:
+  contents: read
+
+# Um deploy por vez; um push novo espera o anterior terminar (nao cancela no
+# meio de uma migration).
+concurrency:
+  group: deploy-staging-backend
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-2 # regiao do projeto AWS (a SCP nega as demais)
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+    name: build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { service: gateway, dockerfile: Getway.WebApi/Dockerfile }
+          - { service: auth, dockerfile: Auth.WebApi/Dockerfile }
+          - { service: cart, dockerfile: Cart.WebApi/Dockerfile }
+          - { service: catalog, dockerfile: Catalog.Api/Dockerfile }
+          - { service: order, dockerfile: Order.WebApi/Dockerfile }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Tags sao IMMUTABLE no ECR: re-executar o workflow do mesmo commit nao
+      # deve falhar tentando sobrescrever a imagem.
+      - id: exists
+        run: |
+          if aws ecr describe-images --repository-name "bnshop/${{ matrix.service }}" \
+               --image-ids imageTag="${IMAGE_TAG}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.exists.outputs.skip != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      # linux/arm64 para a t4g. O Dockerfile faz cross-compile (SDK em x64,
+      # binario arm64), entao nao precisa emular o SDK via QEMU.
+      - if: steps.exists.outputs.skip != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          target: final
+          platforms: linux/arm64
+          push: true
+          provenance: false # evita manifest extra contando no storage do ECR
+          tags: ${{ steps.ecr.outputs.registry }}/bnshop/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # O estado de ANTES decide se desligamos no fim. Olhar so a EC2 (e nao o
+      # "check" completo) evita um falso positivo as 8h, quando ela ja esta
+      # ligando pela agenda mas o agente SSM ainda nao ficou online.
+      - name: Garante o staging ligado
+        id: power
+        env:
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          DB_INSTANCE_ID: ${{ vars.DB_INSTANCE_ID }}
+        run: |
+          state=$(aws ec2 describe-instances --instance-ids "$EC2_INSTANCE_ID" \
+            --query 'Reservations[0].Instances[0].State.Name' --output text)
+          case "$state" in
+            stopped|stopping) echo "was_off=true" >> "$GITHUB_OUTPUT"
+                              echo "::notice::Fora do horario: ligando so para o deploy (desliga no fim)." ;;
+            *)                echo "was_off=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+          # Idempotente: se ja estiver tudo ligado, so confirma e segue.
+          bash deploy/staging/power.sh start
+          if [ "$state" != "running" ]; then
+            # Containers antigos sobem pelo restart policy; da tempo de o
+            # Docker estabilizar antes do compose up do deploy.
+            sleep 60
+          fi
+
+      # Bundle versionado por commit: o que a EC2 executa e exatamente o
+      # compose/script desta revisao (rollback = reexecutar um sha antigo).
+      - name: Publica bundle de deploy no S3
+        run: |
+          dest="s3://${{ vars.PRIVATE_BUCKET }}/deploy/${IMAGE_TAG}/"
+          aws s3 cp docker-compose.staging.yml "$dest" --only-show-errors
+          aws s3 cp deploy/staging/ "$dest" --recursive --only-show-errors
+
+      - name: Executa deploy na EC2 via SSM Run Command
+        run: |
+          release="/opt/bnshop/releases/${IMAGE_TAG}"
+          commands=$(jq -cn --arg b "${{ vars.PRIVATE_BUCKET }}" --arg s "$IMAGE_TAG" --arg r "$release" \
+            '{commands: [
+               "set -euo pipefail",
+               ("aws s3 cp --recursive --only-show-errors s3://" + $b + "/deploy/" + $s + "/ " + $r + "/"),
+               ("bash " + $r + "/deploy.sh " + $s)
+            ]}')
+
+          command_id=$(aws ssm send-command \
+            --instance-ids "${{ vars.EC2_INSTANCE_ID }}" \
+            --document-name AWS-RunShellScript \
+            --comment "deploy ${IMAGE_TAG:0:7}" \
+            --timeout-seconds 600 \
+            --parameters "$commands" \
+            --query Command.CommandId --output text)
+          echo "SSM command: $command_id"
+
+          # Espera terminar (ate ~15 min) sem falhar no timeout do waiter.
+          for _ in $(seq 1 90); do
+            status=$(aws ssm get-command-invocation --command-id "$command_id" \
+              --instance-id "${{ vars.EC2_INSTANCE_ID }}" --query Status --output text 2>/dev/null || echo Pending)
+            case "$status" in Pending|InProgress|Delayed) sleep 10 ;; *) break ;; esac
+          done
+
+          aws ssm get-command-invocation --command-id "$command_id" \
+            --instance-id "${{ vars.EC2_INSTANCE_ID }}" \
+            --query '[StandardOutputContent, StandardErrorContent]' --output text
+
+          echo "Status final: $status"
+          [ "$status" = "Success" ]
+
+      # Roda mesmo se o deploy falhar: fora do horario, nada fica ligado a toa.
+      # Para depurar uma falha, use o workflow "Power staging" (start).
+      - name: Desliga de novo (estava desligado antes do deploy)
+        if: always() && steps.power.outputs.was_off == 'true'
+        env:
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          DB_INSTANCE_ID: ${{ vars.DB_INSTANCE_ID }}
+        run: bash deploy/staging/power.sh stop

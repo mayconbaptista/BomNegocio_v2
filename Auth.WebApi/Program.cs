@@ -49,6 +49,14 @@ try
 
     var app = builder.Build();
 
+    // Modo job: `docker compose run --rm auth.webapi --migrate` aplica as
+    // migrations uma unica vez e encerra, antes de subir as replicas novas.
+    if (args.Contains("--migrate"))
+    {
+        app.ApplyMigrations();
+        return;
+    }
+
     if (!app.Environment.IsProduction())
     {
         app.UseSwagger();

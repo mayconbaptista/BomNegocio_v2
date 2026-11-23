@@ -26,7 +26,6 @@ public class InsertImageHandler(IUnitOfWork unitOfWork, ILogger<InsertImageHandl
             BucketName = serviceS3Config.Value.BucketName,
             Key = $"{request.productId}_{request.name}",
             InputStream = request.pictureStrem,
-            CannedACL = S3CannedACL.PublicRead,
         };
 
         produto.Images.Add(new ImageEntity() {path = imageRequest.Key, name = request.name, ProductId = request.productId });

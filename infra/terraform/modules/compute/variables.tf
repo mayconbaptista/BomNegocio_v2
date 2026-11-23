@@ -14,3 +14,7 @@ variable "architecture" {
 variable "root_volume_size" { type = number }
 variable "docker_compose_version" { type = string }
 
+variable "swap_size_mb" {
+  type    = number
+  default = 2048
+}

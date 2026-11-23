@@ -21,7 +21,7 @@ jobs:
         dotnet-version: 8.0.x # Use a versão do seu projeto
 
     - name: Restore denpendencias
-      run: dotnet restore Cart.WebAPI/Cart.WebAPI.csproj
+      run: dotnet restore Cart.WebApi/Cart.WebApi.csproj
 
     - name: Build
       run: dotnet build Cart.WebApi/

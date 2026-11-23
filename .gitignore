@@ -383,3 +383,6 @@ crash.*.log
 !.env.example
 .env.staging
 !.env.staging.example
+
+# Terraform backend local config
+backend.hcl

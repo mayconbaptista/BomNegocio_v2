@@ -40,6 +40,14 @@ try
 
     var app = builder.Build();
 
+    // Modo job: `docker compose run --rm <servico> --migrate` aplica as
+    // migrations uma unica vez e encerra, antes de subir as replicas novas.
+    if (args.Contains("--migrate"))
+    {
+        await app.ApplyMigrations();
+        return;
+    }
+
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsProduction())
     {
@@ -73,4 +81,7 @@ try
 catch (Exception ex)
 {
     Console.WriteLine(ex.Message);
+    // Relanca para o processo sair com codigo != 0: o orquestrador (compose,
+    // job de migration, ECS) precisa enxergar a falha de startup.
+    throw;
 }

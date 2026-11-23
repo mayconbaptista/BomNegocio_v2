@@ -24,6 +24,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <!-- Carter.Analyzers exige Roslyn 4.7.0 e EF Core Design 8.0.x puxa 4.5.0 (NU1107).
+         Referencia direta vence pela regra "nearest wins"; so design-time. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0" PrivateAssets="all" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11"/>
   </ItemGroup>
 

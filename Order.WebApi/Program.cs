@@ -23,6 +23,14 @@ try
 
     var app = builder.Build();
 
+    // Modo job: `docker compose run --rm <servico> --migrate` aplica as
+    // migrations uma unica vez e encerra, antes de subir as replicas novas.
+    if (args.Contains("--migrate"))
+    {
+        await app.ApplyMigrations();
+        return;
+    }
+
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsProduction())
     {
@@ -45,6 +53,7 @@ try
 
     app.UseHttpsRedirection();
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();

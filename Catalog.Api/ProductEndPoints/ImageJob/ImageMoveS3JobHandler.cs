@@ -17,8 +17,7 @@ public class ImageMoveS3JobHandler(
     IAmazonS3 amazonS3, 
     IOptions<AwsServiceS3Config> s3Config, 
     HttpClient httpClient, 
-    ILogger<ImageMoveS3JobHandler> logger, 
-    IConfiguration config) 
+    ILogger<ImageMoveS3JobHandler> logger) 
     : ICommandHandler<ImageMoveS3JobCommand>
 {
     public async Task<Unit> Handle(ImageMoveS3JobCommand request, CancellationToken cancellationToken)
@@ -28,8 +27,9 @@ public class ImageMoveS3JobHandler(
 
             var images = await unitOfWork.IProductRepository.GeImages();
 
-            var serviceUrl = config.GetValue<string>("AWS:S3:ServiceURL") 
-                ?? throw new ArgumentNullException("A service url do s3 é nula");
+            // Buckets novos usam Object Ownership = BucketOwnerEnforced (ACLs
+            // desativadas): CannedACL.PublicRead falharia na AWS real. A leitura
+            // publica acontece via CloudFront + OAC, nunca direto no bucket.
 
             foreach (var image in images)
             {
@@ -42,14 +42,15 @@ public class ImageMoveS3JobHandler(
                         BucketName = s3Config.Value.BucketName,
                         Key = image.name,
                         InputStream = imageStream,
-                        CannedACL = S3CannedACL.PublicRead,
                         ContentType = "image/png"
                     };
 
                     var response = await amazonS3.PutObjectAsync(imageRequest);
                 };
 
-                image.path = $"/{s3Config.Value.BucketName}/{image.name}";
+                // Persiste somente a chave do objeto. Quem monta a URL publica
+                // (CDN, LocalStack) e a borda/front, nao o dominio.
+                image.path = image.name;
             }
 
             await unitOfWork.SaveChangesAsync();

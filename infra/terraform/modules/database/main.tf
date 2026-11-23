@@ -25,9 +25,16 @@ resource "aws_db_instance" "postgres" {
   multi_az               = false
 
   backup_retention_period = 1
-  deletion_protection     = false
-  skip_final_snapshot     = true
-  apply_immediately       = true
+  # Com a agenda liga/desliga, as janelas PRECISAM cair no horario em que o
+  # banco esta ligado: parado, o RDS nao faz backup automatico e adia a
+  # manutencao. Horarios em UTC.
+  backup_window             = var.backup_window
+  maintenance_window        = var.maintenance_window
+  deletion_protection       = false
+  skip_final_snapshot       = var.skip_final_snapshot
+  final_snapshot_identifier = "${var.project_name}-${var.environment}-postgres-final"
+  copy_tags_to_snapshot     = true
+  apply_immediately         = true
 
   performance_insights_enabled = false
   monitoring_interval          = 0

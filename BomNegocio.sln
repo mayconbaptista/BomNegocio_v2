@@ -58,8 +58,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		.env.example = .env.example
 		.env.staging = .env.staging
 		.env.staging.example = .env.staging.example
-		AGENTS.md = AGENTS.md
 		Directory.Build.props = Directory.Build.props
+		infra\terraform\environments\staging\terraform.tfvars = infra\terraform\environments\staging\terraform.tfvars
 	EndProjectSection
 EndProject
 Global

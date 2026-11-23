@@ -1,12 +1,24 @@
 name: bneshop-staging
 
-# Arquivo autocontido para a EC2. Nao e mesclado automaticamente pelo Visual
-# Studio, portanto o fluxo local atual em docker-compose.override.yml permanece.
+# Arquivo autocontido para a EC2 (staging na AWS). Nao e mesclado com o
+# docker-compose.override.yml do Visual Studio.
+#
+# Fluxo de rede (ADR-012):
+#   Browser --HTTPS--> CloudFront --HTTPS + X-Origin-Verify--> Cloudflare
+#     ==tunnel==> cloudflared --> Traefik --> Ocelot --> APIs
+#
+# - NENHUM container publica porta para a internet: o cloudflared abre uma
+#   conexao de SAIDA ate a Cloudflare, e o Security Group nao tem entrada.
+# - Imagens sao SEMPRE URIs imutaveis do ECR (tag = git sha). Nao existe
+#   "build" aqui: o que roda em staging e exatamente o que o CI testou.
+# - Variaveis vem de /run/bnshop/staging.env, gerado pelo deploy.sh a partir
+#   do Parameter Store (tmpfs: nunca toca o disco).
 
 x-api-environment: &api-environment
   ASPNETCORE_ENVIRONMENT: Staging
   ASPNETCORE_HTTP_PORTS: 8080
-  AWS_REGION: ${AWS_REGION:-us-east-1}
+  AWS_REGION: ${AWS_REGION:?Defina AWS_REGION}
+  Logging__LogLevel__Default: ${LOG_LEVEL:-Warning}
 
 x-authentication: &authentication
   Authentication__Schemes__Bearer__ValidAudience: ${AUTH_VALID_AUDIENCE:?Defina AUTH_VALID_AUDIENCE}
@@ -18,6 +30,8 @@ x-authentication: &authentication
 x-container-defaults: &container-defaults
   init: true
   restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
   logging:
     driver: json-file
     options:
@@ -27,7 +41,7 @@ x-container-defaults: &container-defaults
 services:
   traefik:
     <<: *container-defaults
-    image: traefik:v3.5
+    image: traefik:v3.6
     mem_limit: 96m
     mem_reservation: 48m
     memswap_limit: 96m
@@ -35,35 +49,45 @@ services:
     pids_limit: 100
     command:
       - --api.dashboard=false
+      - --ping=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=bneshop-edge
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:?Defina ACME_EMAIL}
-      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
-    environment:
-      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:?Defina CF_DNS_API_TOKEN}
-    ports:
-      - "443:443"
+      - --entrypoints.web.address=:80
+      - --log.level=WARN
+    # Sem "ports": o Traefik so e alcancado pelo cloudflared, na rede edge.
     volumes:
+      # Socket read-only ainda equivale a acesso de leitura amplo ao daemon.
+      # Trade-off aceito em staging; alternativa: provider de arquivo.
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-certificates:/letsencrypt
     networks:
       - edge
-    security_opt:
-      - no-new-privileges:true
+
+  # Conector do Cloudflare Tunnel. O token so permite rodar este tunnel; as
+  # regras de roteamento (hostname -> http://traefik:80) ficam na Cloudflare,
+  # gerenciadas pelo Terraform (modules/tunnel).
+  cloudflared:
+    <<: *container-defaults
+    image: cloudflare/cloudflared:2026.10.0
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Defina CLOUDFLARE_TUNNEL_TOKEN}
+    mem_limit: 64m
+    mem_reservation: 32m
+    memswap_limit: 96m
+    cpus: 0.20
+    pids_limit: 100
+    depends_on:
+      - traefik
+    networks:
+      - edge
 
   getway.webapi:
     <<: *container-defaults
-    image: ${GATEWAY_IMAGE:-bneshop/gateway:staging}
-    build:
-      context: .
-      dockerfile: Getway.WebApi/Dockerfile
+    image: ${GATEWAY_IMAGE:?Defina GATEWAY_IMAGE}
     mem_limit: 160m
     mem_reservation: 80m
-    memswap_limit: 160m
+    memswap_limit: 256m
     cpus: 0.35
     pids_limit: 150
     environment:
@@ -75,10 +99,11 @@ services:
       - "127.0.0.1:18080:8080"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.bneshop-api.rule=Host(`${BNSHOP_API_HOST:?Defina BNSHOP_API_HOST}`)
-      - traefik.http.routers.bneshop-api.entrypoints=websecure
-      - traefik.http.routers.bneshop-api.tls=true
-      - traefik.http.routers.bneshop-api.tls.certresolver=letsencrypt
+      # Requisicoes sem o header secreto (ex.: alguem chamando o hostname de
+      # origem do tunnel direto, sem passar pelo CloudFront) nao casam com
+      # nenhuma rota e recebem 404 do Traefik.
+      - traefik.http.routers.bneshop-api.rule=PathPrefix(`/api`) && Header(`X-Origin-Verify`, `${ORIGIN_VERIFY_SECRET:?Defina ORIGIN_VERIFY_SECRET}`)
+      - traefik.http.routers.bneshop-api.entrypoints=web
       - traefik.http.services.bneshop-api.loadbalancer.server.port=8080
       - traefik.docker.network=bneshop-edge
     depends_on:
@@ -92,13 +117,10 @@ services:
 
   auth.webapi:
     <<: *container-defaults
-    image: ${AUTH_IMAGE:-bneshop/auth:staging}
-    build:
-      context: .
-      dockerfile: Auth.WebApi/Dockerfile
+    image: ${AUTH_IMAGE:?Defina AUTH_IMAGE}
     mem_limit: 224m
     mem_reservation: 96m
-    memswap_limit: 224m
+    memswap_limit: 320m
     cpus: 0.40
     pids_limit: 200
     environment:
@@ -115,13 +137,10 @@ services:
 
   cart.webapi:
     <<: *container-defaults
-    image: ${CART_IMAGE:-bneshop/cart:staging}
-    build:
-      context: .
-      dockerfile: Cart.WebApi/Dockerfile
+    image: ${CART_IMAGE:?Defina CART_IMAGE}
     mem_limit: 256m
     mem_reservation: 112m
-    memswap_limit: 256m
+    memswap_limit: 384m
     cpus: 0.45
     pids_limit: 200
     environment:
@@ -139,13 +158,10 @@ services:
 
   catalog.api:
     <<: *container-defaults
-    image: ${CATALOG_IMAGE:-bneshop/catalog:staging}
-    build:
-      context: .
-      dockerfile: Catalog.Api/Dockerfile
+    image: ${CATALOG_IMAGE:?Defina CATALOG_IMAGE}
     mem_limit: 320m
     mem_reservation: 144m
-    memswap_limit: 320m
+    memswap_limit: 448m
     cpus: 0.55
     pids_limit: 250
     environment:
@@ -164,20 +180,17 @@ services:
 
   order.webapi:
     <<: *container-defaults
-    image: ${ORDER_IMAGE:-bneshop/order:staging}
-    build:
-      context: .
-      dockerfile: Order.WebApi/Dockerfile
+    image: ${ORDER_IMAGE:?Defina ORDER_IMAGE}
     mem_limit: 320m
     mem_reservation: 144m
-    memswap_limit: 320m
+    memswap_limit: 448m
     cpus: 0.55
     pids_limit: 250
     environment:
       <<: [*api-environment, *authentication]
       ConnectionStrings__Database: ${ORDER_DB_CONNECTION:?Defina ORDER_DB_CONNECTION}
       EFI__CertificatePath: /run/secrets/efi-certificate.p12
-      EFI__CertificatePassword: ${EFI_CERTIFICATE_PASSWORD:?Defina EFI_CERTIFICATE_PASSWORD}
+      EFI__CertificatePassword: ${EFI_CERTIFICATE_PASSWORD:-}
     volumes:
       - ${EFI_CERTIFICATE_HOST_PATH:?Defina EFI_CERTIFICATE_HOST_PATH}:/run/secrets/efi-certificate.p12:ro
     expose:
@@ -194,6 +207,3 @@ networks:
     name: bneshop-edge
   backend:
     name: bneshop-backend
-
-volumes:
-  traefik-certificates:

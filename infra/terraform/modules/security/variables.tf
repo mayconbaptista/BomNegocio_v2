@@ -37,3 +37,8 @@ variable "private_bucket_arn" {
   description = "ARN do bucket privado de artefatos/certificados"
   type        = string
 }
+
+variable "ecr_repository_arns" {
+  description = "Repositorios ECR dos quais a EC2 pode fazer pull"
+  type        = list(string)
+}

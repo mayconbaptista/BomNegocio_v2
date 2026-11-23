@@ -4,14 +4,12 @@ variable "project_name" {
   default     = "bnshop"
 }
 
+# Regiao do projeto AWS (nova experiencia): a SCP gerenciada NEGA recursos
+# regionais em qualquer outra. Confira em AWS Settings > View all projects >
+# Overview > Additional Info > Region. As zonas sao derivadas dela (main.tf).
 variable "aws_region" {
   type    = string
-  default = "us-east-1"
-}
-
-variable "availability_zones" {
-  type    = list(string)
-  default = ["us-east-1a", "us-east-1b"]
+  default = "us-east-2"
 }
 
 variable "vpc_cidr" {
@@ -79,12 +77,89 @@ variable "db_master_password_version" {
   default     = 1
 }
 
-variable "budget_email" {
-  description = "E-mail que recebera alertas de custo"
+variable "alert_email" {
+  description = "E-mail para alertas de custo (Budget) e operacao (CloudWatch)"
   type        = string
 }
 
+# Teto para os creditos durarem os 6 meses do Free Plan: US$ 100 / 6 = 16,6.
+# Esperado com dias uteis 8h-20h + Tunnel: ~US$ 14/mes (Plano de Custos).
+# Acima de 16, os creditos acabam antes do mes 6: agenda desligada, recurso
+# esquecido, ambiente ligado fora do horario...
 variable "monthly_budget_usd" {
   type    = number
-  default = 10
+  default = 16
+}
+
+variable "auth_valid_issuer" {
+  type    = string
+  default = "bn-auth-sso"
+}
+
+variable "github_backend_repository" {
+  description = "owner/repo do backend .NET"
+  type        = string
+  default     = "mayconbaptista/BomNegocio_v2"
+}
+
+variable "github_frontend_repository" {
+  description = "owner/repo do frontend Angular"
+  type        = string
+  default     = "mayconbaptista/bnEshop-ecommerce"
+}
+
+# --- Dominio (Cloudflare somente DNS -> CloudFront) --------------------------
+
+variable "cloudflare_account_id" {
+  description = "Account ID da Cloudflare (painel do dominio > Overview > API); usado pelo Tunnel"
+  type        = string
+}
+
+variable "cloudflare_zone_id" {
+  description = "Zone ID do dominio no Cloudflare (painel do dominio > Overview > API)"
+  type        = string
+}
+
+variable "domain_name" {
+  description = "Dominio raiz registrado no Cloudflare, ex.: meudominio.com.br"
+  type        = string
+}
+
+variable "app_subdomain" {
+  description = "Subdominio do BnEshop; string vazia usa o dominio raiz"
+  type        = string
+  default     = "bneshop"
+}
+
+# --- Agenda liga/desliga (EventBridge Scheduler) ------------------------------
+
+variable "power_schedule_enabled" {
+  description = "false = ambiente 24/7 (schedules ficam DISABLED, nada e destruido)"
+  type        = bool
+  default     = true
+}
+
+variable "power_schedule_timezone" {
+  type    = string
+  default = "America/Sao_Paulo"
+}
+
+# cron(min hora dia-do-mes mes dia-da-semana ano), no fuso acima.
+# Liga em dias uteis 8h-20h (horario em que recrutadores costumam abrir o
+# link). Os desligamentos rodam TODO dia as 20h e as 23h: se voce ligar
+# manualmente (post no LinkedIn, entrevista), o ambiente nao fica esquecido.
+# Parar algo que ja esta parado gera um erro inofensivo no Scheduler.
+variable "power_schedule" {
+  type = object({
+    rds_start = string
+    ec2_start = string
+    ec2_stop  = string
+    rds_stop  = string
+  })
+  default = {
+    rds_start = "cron(40 7 ? * MON-FRI *)" # 20 min antes: o RDS leva 5-10 min para ficar "available"
+    ec2_start = "cron(0 8 ? * MON-FRI *)"
+    ec2_stop  = "cron(0 20,23 * * ? *)"
+    rds_stop  = "cron(10 20,23 * * ? *)" # depois da app, para nao derrubar conexoes abertas
+  }
 }
