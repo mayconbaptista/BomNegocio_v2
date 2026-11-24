@@ -153,6 +153,20 @@ data "aws_iam_policy_document" "application_runtime" {
     actions   = ["s3:GetObject"]
     resources = ["${var.private_bucket_arn}/deploy/*"]
   }
+
+  # "aws s3 cp --recursive" baixa a PASTA do commit: listar o bucket e uma
+  # permissao do BUCKET (nao do objeto). Restrita ao prefixo deploy/.
+  statement {
+    sid       = "ListDeployBundles"
+    actions   = ["s3:ListBucket"]
+    resources = [var.private_bucket_arn]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["deploy/*"]
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "application_runtime" {
