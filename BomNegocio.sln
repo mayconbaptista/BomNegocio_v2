@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.9.34723.18
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11505.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{28BE1BA0-9A70-48E4-A61B-F11BC25BF65D}"
 EndProject
@@ -14,13 +14,6 @@ EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{65C43E9E-A2AE-436B-BF61-6BC939213E38}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cart", "Cart", "{5C88CB0D-2E17-4FBA-A07D-8B38DA701D5B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A0687238-3C20-47D4-BD3D-CBC9DF1BD638}"
-	ProjectSection(SolutionItems) = preProject
-		01-init.sh = 01-init.sh
-		02-init.sql = 02-init.sql
-		03-init.sql = 03-init.sql
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cart.WebApi", "Cart.WebApi\Cart.WebApi.csproj", "{BDF62BA1-2DF7-4F3B-8024-73B57005CAE2}"
 EndProject
@@ -57,6 +50,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Order.Domain.Test", "Order.Domain.Test\Order.Domain.Test.csproj", "{81524383-3E7B-4B56-B775-BFBECB970DD7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catalog.Api", "Catalog.Api\Catalog.Api.csproj", "{F17EFD25-AC69-430D-ABB1-3630F3BCE99F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens de Solução", "{380A7511-A354-6D7A-0CC0-8FA1F1BA7B6C}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.env = .env
+		.env.example = .env.example
+		.env.staging = .env.staging
+		.env.staging.example = .env.staging.example
+		Directory.Build.props = Directory.Build.props
+		infra\terraform\environments\staging\terraform.tfvars = infra\terraform\environments\staging\terraform.tfvars
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,7 +155,6 @@ Global
 		{B0259CB3-EF9D-4B54-A060-70DABD2A4D7B} = {18BF2912-1584-4AFD-A5A7-DC5A9DC508FC}
 		{25613B47-02D9-4212-9A54-B4215D3A0532} = {18BF2912-1584-4AFD-A5A7-DC5A9DC508FC}
 		{5C88CB0D-2E17-4FBA-A07D-8B38DA701D5B} = {18BF2912-1584-4AFD-A5A7-DC5A9DC508FC}
-		{A0687238-3C20-47D4-BD3D-CBC9DF1BD638} = {89EADAEE-6A17-46F4-8F64-0F15CDFD4700}
 		{BDF62BA1-2DF7-4F3B-8024-73B57005CAE2} = {5C88CB0D-2E17-4FBA-A07D-8B38DA701D5B}
 		{306E7E4D-AA35-47A1-A717-82F3093CEB00} = {89EADAEE-6A17-46F4-8F64-0F15CDFD4700}
 		{C375DB3D-A47E-4982-B06B-ED168B850024} = {B0259CB3-EF9D-4B54-A060-70DABD2A4D7B}

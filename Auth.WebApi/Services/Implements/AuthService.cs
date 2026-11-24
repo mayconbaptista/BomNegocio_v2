@@ -61,7 +61,7 @@ namespace Auth.WebApi.Services.Implements
             var result = new TokenModel
             {
                 UserId = user.Id,
-                AcessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
                 ExpirationAt = DateTime.Now.AddMinutes(5)
             };
 
@@ -69,7 +69,7 @@ namespace Auth.WebApi.Services.Implements
         }
 
 
-        public async Task<string> RegisterAsync(UserCreateDTo userDto)
+        public async Task RegisterAsync(UserCreateDTo userDto)
         {
             var userExists = await _userManager.FindByEmailAsync(userDto.Email);
 
@@ -93,8 +93,6 @@ namespace Auth.WebApi.Services.Implements
 
             if (!result.Succeeded)
                 throw new Exception($"Erro ao criar usuário: {result.Errors.Select(x => x.Description).ToString()}");
-
-            return user.Id;
         }
     }
 }

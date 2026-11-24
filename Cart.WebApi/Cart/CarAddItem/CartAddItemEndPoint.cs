@@ -1,7 +1,6 @@
 ﻿using BuildBlocks.WebApi.Filters;
 using Cart.WebApi.Cart.CartCheckout;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Cart.WebApi.Cart.CarAddItem;
 

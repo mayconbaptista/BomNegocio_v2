@@ -16,6 +16,7 @@
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
+    <None Include="docker-compose.staging.yml" />
     <None Include="docker-compose.vs.debug.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>

@@ -8,17 +8,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-
-        });
-    });
-
     builder.Services.AddCarter();
 
     // Add services to the container.
@@ -42,9 +31,6 @@ try
     builder.Services.AddGrpcClient<ProductGRPC.ProductGRPCClient>(options =>
     {
         options.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
-    }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-    {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
     });
 
     builder.Services.AddMessageBroker(builder.Configuration);
@@ -53,6 +39,14 @@ try
     builder.Services.AddProblemDetails();
 
     var app = builder.Build();
+
+    // Modo job: `docker compose run --rm <servico> --migrate` aplica as
+    // migrations uma unica vez e encerra, antes de subir as replicas novas.
+    if (args.Contains("--migrate"))
+    {
+        await app.ApplyMigrations();
+        return;
+    }
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsProduction())
@@ -71,8 +65,6 @@ try
         }
     }
 
-    app.UseCors();
-
     app.UseExceptionHandler(options => { });
 
     app.UseHttpsRedirection();
@@ -89,4 +81,7 @@ try
 catch (Exception ex)
 {
     Console.WriteLine(ex.Message);
+    // Relanca para o processo sair com codigo != 0: o orquestrador (compose,
+    // job de migration, ECS) precisa enxergar a falha de startup.
+    throw;
 }

@@ -4,7 +4,7 @@ using Order.Domain.Entities;
 
 namespace Order.Infrastructure.Data.Configurations
 {
-    public class OrderEntityConfiguration : IEntityTypeConfiguration<OrderEntity>
+    internal class OrderEntityConfiguration : IEntityTypeConfiguration<OrderEntity>
     {
         public void Configure(EntityTypeBuilder<OrderEntity> builder)
         {
@@ -18,7 +18,8 @@ namespace Order.Infrastructure.Data.Configurations
                 .ValueGeneratedOnAdd();
 
             builder.Property(e => e.Status)
-                .HasColumnName("status_code")
+                .HasColumnName("status")
+                .HasConversion<string>()
                 .IsRequired(true);
 
             builder.Property(e => e.CreateAt)
@@ -70,7 +71,7 @@ namespace Order.Infrastructure.Data.Configurations
 
                 a.Property(e => e.State)
                     .HasColumnName("billing_address_state")
-                    .HasMaxLength(60)
+                    .HasMaxLength(2)
                     .IsRequired();
 
                 a.Property(e => e.Street)
@@ -80,15 +81,39 @@ namespace Order.Infrastructure.Data.Configurations
 
                 a.Property(e => e.ZipCode)
                     .HasColumnName("billing_address_zip_code")
-                    .HasMaxLength(60)
+                    .HasMaxLength(8)
+                    .IsFixedLength(true)
                     .IsRequired();
             });
+
+            builder.ComplexProperty(e => e.Delivery, a =>
+            {
+                a.Property(e => e.Type)
+                    .HasColumnName("delivery_type")
+                    .HasConversion<string>()
+                    .IsRequired(true);
+
+                a.Property(e => e.EstimatedDeliveryDate)
+                    .HasColumnName("delivery_estimatedDeliveryDate")
+                    .IsRequired(true);
+
+                a.Property(e => e.Price)
+                    .HasColumnName("delivery_price")
+                    .IsRequired(true);
+            });
+
+            builder.HasOne(e => e.Payment)
+                .WithOne()
+                .HasForeignKey<PaymentEntity>(e => e.OrderId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_order_payment");
 
             builder.HasMany(e => e.OrderItems)
                 .WithOne()
                 .HasForeignKey(e => e.OrderId)
                 .IsRequired(true)
-                .OnDelete(DeleteBehavior.NoAction)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Order_OrderItem");
         }
     }

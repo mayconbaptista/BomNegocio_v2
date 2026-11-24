@@ -361,3 +361,28 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# minhas pastas
+volume/
+localstack/
+scripts/
+*.md
+!README.md
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+
+# Docker Compose secrets (infra sem projeto .NET associado)
+.env
+!.env.example
+.env.staging
+!.env.staging.example
+
+# Terraform backend local config
+backend.hcl

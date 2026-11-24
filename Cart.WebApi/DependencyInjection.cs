@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cart.WebApi
 {
@@ -13,8 +13,8 @@ namespace Cart.WebApi
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             #endregion
 
-            var connection = config.GetConnectionString("DbConnection")
-                ?? throw new ArgumentNullException("DbConnection is not found in the configuration file.");
+            var connection = config.GetConnectionString("Database")
+                ?? throw new InvalidOperationException("Connection string 'Database' was not configured.");
 
             services.AddDbContext<CartContext>((sp, options) =>
             {

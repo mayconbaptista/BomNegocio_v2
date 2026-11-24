@@ -10,9 +10,6 @@ namespace BuildBlocks.WebApi.Exceptions.Handlers
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            logger.LogError(exception, exception.Message, DateTime.UtcNow);
-
-
             (string detail, string title, int statusCode)  details = exception switch
             {
                 System.ComponentModel.DataAnnotations.ValidationException validationException => 
@@ -22,11 +19,11 @@ namespace BuildBlocks.WebApi.Exceptions.Handlers
                         StatusCodes.Status422UnprocessableEntity
                     ),
                 FluentValidation.ValidationException fluentValidationException =>
-                (
-                    fluentValidationException.Message,
-                    fluentValidationException.GetType().Name,
-                    StatusCodes.Status422UnprocessableEntity
-                ),
+                    (
+                        fluentValidationException.Message,
+                        fluentValidationException.GetType().Name,
+                        StatusCodes.Status422UnprocessableEntity
+                    ),
                 BadHttpRequestException badHtpReqException =>
                     (
                         badHtpReqException.Message,
@@ -46,6 +43,17 @@ namespace BuildBlocks.WebApi.Exceptions.Handlers
                         StatusCodes.Status500InternalServerError
                     )
             };
+
+            if(details.statusCode != StatusCodes.Status500InternalServerError)
+            {
+                logger.LogWarning(exception, exception.Message);
+            }
+            else
+            {
+                exception.Data["HttpContext"] = httpContext.ToString();
+
+                logger.LogError(exception, exception.Message);
+            }
 
             var problemDetails = new ProblemDetails
             {

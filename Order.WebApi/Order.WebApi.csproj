@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>e8e55145-58c4-49da-b2b7-ca94b8864914</UserSecretsId>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 

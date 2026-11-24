@@ -9,7 +9,7 @@ namespace Order.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderItemEntity> builder)
         {
-            builder.ToTable("order_item");
+            builder.ToTable("Order_item");
             builder.HasKey(e => new {e.OrderId, e.ProductId});
 
             builder.Ignore(e => e.Id);

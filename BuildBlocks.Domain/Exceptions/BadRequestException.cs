@@ -8,5 +8,13 @@ namespace BuildBlocks.Domain.Exceptions
         public BadRequestException(string message) : base(message)
         {
         }
+
+        public BadRequestException() : base()
+        {
+        }
+
+        public BadRequestException(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
     }
 }

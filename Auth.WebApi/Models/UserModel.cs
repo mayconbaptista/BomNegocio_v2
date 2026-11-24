@@ -1,5 +1,4 @@
-﻿using BuildBlocks.Domain.ValueObjects;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Auth.WebApi.Models
 {

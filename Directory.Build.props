@@ -1,0 +1,23 @@
+<Project>
+  <!-- ITENS DE INSTALAÇÃO AUTOMÁTICA (ANALYZERS) -->
+  <ItemGroup>
+    <!-- Use PackageReference AQUI, porque você quer que eles sejam instalados em todos os projetos que importam este props -->
+    <PackageReference Include="Roslynator.Analyzers" Version="4.12.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.25.0.90414">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- ITENS APENAS DE VERSIONAMENTO (Packages comuns) -->
+  <ItemGroup>
+    <!-- Use PackageVersion para definir a versão mestra dos pacotes que serão instalados individualmente nos .csproj -->
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageVersion Include="FluentValidation" Version="11.11.0" />
+    <!-- ... outras dependencias que vão nos .csproj específicos ... -->
+  </ItemGroup>
+</Project>

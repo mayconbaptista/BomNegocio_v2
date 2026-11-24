@@ -8,17 +8,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-
-        });
-    });
-
     // Add services to the container.
     builder.Services.AddApplicationServices(builder.Configuration);
     builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -33,6 +22,14 @@ try
     builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
     var app = builder.Build();
+
+    // Modo job: `docker compose run --rm <servico> --migrate` aplica as
+    // migrations uma unica vez e encerra, antes de subir as replicas novas.
+    if (args.Contains("--migrate"))
+    {
+        await app.ApplyMigrations();
+        return;
+    }
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsProduction())
@@ -52,12 +49,11 @@ try
         }
     }
 
-    app.UseCors();
-
     app.UseExceptionHandler(options => { });
 
     app.UseHttpsRedirection();
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();

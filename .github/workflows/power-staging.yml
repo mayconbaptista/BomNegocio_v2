@@ -1,0 +1,48 @@
+name: Power staging
+
+# Liga/desliga o backend fora da agenda (dias uteis 8h-20h, America/Sao_Paulo).
+# Casos de uso: vai postar uma feature no LinkedIn no sabado ou tem entrevista
+# as 21h? Rode "start" ~15 min antes (funciona pelo app do GitHub no celular).
+# A agenda desliga tudo sozinha as 20h e as 23h, todo dia.
+#
+# Settings > Secrets and variables > Actions (os mesmos do deploy-staging.yml):
+#   Secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+#   Variables: EC2_INSTANCE_ID -> instance_id | DB_INSTANCE_ID -> rds_instance_id
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "start = liga RDS + EC2 | stop = desliga | status = so consulta"
+        type: choice
+        options: [status, start, stop]
+        default: status
+
+permissions:
+  contents: read
+
+# Mesmo grupo do deploy: nunca desligar no meio de um deploy/migration.
+concurrency:
+  group: deploy-staging-backend
+  cancel-in-progress: false
+
+jobs:
+  power:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 40
+    env:
+      AWS_REGION: us-east-2 # regiao do projeto AWS
+      EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+      DB_INSTANCE_ID: ${{ vars.DB_INSTANCE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ${{ inputs.action }}
+        run: bash deploy/staging/power.sh "${{ inputs.action }}"

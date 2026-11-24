@@ -1,13 +1,17 @@
-version: '3.4'
 
 services:
 
-    bom_negocio.db:
+    traefik.local:
+        image: traefik:v3.5
+        container_name: traefik.local
+        restart: unless-stopped
+        profiles: ["traefik_local"]
+
+    bom_negocio.db: # somente para desenvolvimento local, nao usar em producao
         image: postgres:16.4
         hostname: bom_negocio_db
         container_name: bn_db
-        profiles: ["vs_debug", "db"]
-
+        profiles: ["postgresql_db"]
 
     auth.webapi:
         image: ${DOCKER_REGISTRY-}authwebapi
@@ -18,8 +22,6 @@ services:
             dockerfile: Auth.WebApi/Dockerfile
         depends_on:
             - bom_negocio.db
-        profiles: ["vs_debug", "auth"]
-
 
     getway.webapi:
         image: ${DOCKER_REGISTRY-}getwaywebapi
@@ -33,22 +35,6 @@ services:
             - cart.webapi
             - catalog.api
             - order.webapi
-        profiles: ["vs_debug", "gateway"]
-
-    message.broker:
-        image: rabbitmq:4.0-management
-        hostname: message-mq
-        container_name: masstransit-mq
-        profiles: ["vs_debug", "message_broker"]
-
-    aux:
-        image: alpine:3.14
-        command: sh -c "apk add --no-cache curl && while true; do sleep 30; done"
-        hostname: aux
-        container_name: aux
-        stdin_open: true
-        tty: true
-        profiles: ["vs_sso_debug"]
 
     order.webapi:
         image: ${DOCKER_REGISTRY-}orderwebapi
@@ -59,8 +45,7 @@ services:
             dockerfile: Order.WebApi/Dockerfile
         depends_on:
             - bom_negocio.db
-            - message.broker
-        profiles: ["vs_debug", "order"] 
+            - localstack
 
     cart.webapi:
         image: ${DOCKER_REGISTRY-}cartwebapi
@@ -71,14 +56,7 @@ services:
             dockerfile: Cart.WebApi/Dockerfile
         depends_on:
             - bom_negocio.db
-            - message.broker 
-        profiles: ["vs_debug", "cart"]
-
-    catalog.db:
-        image: mysql:8.0.37
-        hostname: catalog.db
-        container_name: catalog.db
-        profiles: ["vs_debug", "catalog"]
+            - localstack
 
     catalog.api:
         image: ${DOCKER_REGISTRY-}catalogapi
@@ -88,6 +66,5 @@ services:
             context: .
             dockerfile: Catalog.Api/Dockerfile
         depends_on:
-            - catalog.db
-        profiles: ["vs_debug", "catalog"]
-
+            - bom_negocio.db
+            - localstack

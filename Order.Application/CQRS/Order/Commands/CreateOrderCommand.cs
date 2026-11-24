@@ -3,6 +3,9 @@ using Order.Domain.Interfaces;
 using Order.Domain.Entities;
 using BuildInBlocks.Messaging.Dtos;
 using BuildBlocks.Domain.Abstractions.CQRS;
+using Order.Domain.ValueObjects;
+using Order.Domain.Enums;
+using Order.Application.Common.Interfaces;
 
 namespace Order.Application.CQRS.Order.Commands;
 
@@ -11,17 +14,22 @@ public sealed record CreateOrderCommand : ICommand<Guid>
     public AddressDto ShippingAdress { get; init; }
     public AddressDto BillingAdress { get; init; }
     public CustomerDto Customer { get; init; }
+    public DeliveryDto Delivery { get; init; }
     public List<OrderItemDto> OrderItems { get; init; } = new();
 }
 
 public sealed class CreateOrderCommandHandler
-    (IUnitOfWork unitOfWork) 
+    (IUnitOfWork unitOfWork, IPaymentProcessor paymentProcessor)
     : ICommandHandler<CreateOrderCommand, Guid>
 {
 
     public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var entt = this.CreateNewOrder(request);
+        var price = request.OrderItems.Sum(x => x.Quantity * x.UnitPrice);
+
+        var paymentEtt = await paymentProcessor.ProcessPixPayment(request.Customer.Documento, request.Customer.Name, price);
+
+        var entt = this.CreateNewOrderPix(request, paymentEtt);
 
         await unitOfWork.OrderRepository.AddAsync(entt);
 
@@ -35,8 +43,10 @@ public sealed class CreateOrderCommandHandler
         return entt.Id;
     }
 
-    public OrderEntity CreateNewOrder(CreateOrderCommand request)
+    public OrderEntity CreateNewOrderPix(CreateOrderCommand request, PaymentEntity payment)
     {
+
+
         var shippingAddress = new Address(
             request.ShippingAdress.Name,
             request.ShippingAdress.Street,
@@ -53,6 +63,17 @@ public sealed class CreateOrderCommandHandler
             request.BillingAdress.Country,
             request.BillingAdress.ZipCode);
 
-        return OrderEntity.Create(request.Customer.Id, shippingAddress, billingAddress);
+        OrderEntity entt = OrderEntity.Create(
+            request.Customer.Documento,
+            shippingAddress,
+            billingAddress,
+            payment,
+            Delivery.Create(
+                DeliveryType.Standard,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(45)),
+                10)
+            );
+
+        return entt;
     }
 }

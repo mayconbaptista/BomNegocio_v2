@@ -20,8 +20,12 @@
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HTTPS_PORTS": "8081",
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "AWS_ACCESS_KEY_ID": "testeid",
+        "AWS_SECRET_ACCESS_KEY": "testekey",
+        "AWS_REGION": "us-east-1"
       },
       "publishAllPorts": true,
       "useSSL": true

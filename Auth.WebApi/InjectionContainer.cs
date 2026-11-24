@@ -1,4 +1,7 @@
-﻿namespace Auth.WebApi
+﻿using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
+namespace Auth.WebApi
 {
     public static class InjectionContainer
     {

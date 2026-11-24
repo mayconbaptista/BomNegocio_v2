@@ -6,6 +6,7 @@ public record CartCheckoutRequest
 {
     public AddressDto ShippingAddress { get; init; } = default!;
     public AddressDto BillingAddress { get; init; } = default!;
+    public CustomerDto Customer { get; init; } = default!;
 }
 
 public class CartCheckoutEndpoint : ICarterModule
@@ -20,6 +21,7 @@ public class CartCheckoutEndpoint : ICarterModule
             {
                 ShippingAddress = req.ShippingAddress,
                 BillingAddress = req.BillingAddress,
+                Customer = req.Customer,
                 CustomerId = Guid.Parse(nameIdentifier!)
             };
 

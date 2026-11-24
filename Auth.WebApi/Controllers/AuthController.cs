@@ -26,14 +26,14 @@ namespace Auth.WebApi.Controllers
             return Ok(await _authService.LoginAsync(model));
         }
 
-        [HttpPost("sing-up")]
+        [HttpPost("register")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> SingUp([FromBody] UserCreateDTo user)
         {
-            var id = await _authService.RegisterAsync(user);
+            await _authService.RegisterAsync(user);
 
-            return CreatedAtAction("sing-up", new {Id = id});
+            return Created();
         }
 
 

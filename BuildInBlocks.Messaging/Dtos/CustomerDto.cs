@@ -1,3 +1,5 @@
-﻿namespace BuildInBlocks.Messaging.Dtos;
+﻿using System.ComponentModel.DataAnnotations;
 
-public record CustomerDto(Guid Id, string Name, string Email);
+namespace BuildInBlocks.Messaging.Dtos;
+
+public record CustomerDto([Required] string Documento, [Required] string Name,[Required] string Email);

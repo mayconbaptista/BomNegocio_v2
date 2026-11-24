@@ -13,7 +13,7 @@ namespace Catalog.Api.Data.Repositories
         protected readonly CatalogContext _context = context;
         protected readonly DbSet<TModel> _dbSet = context.Set<TModel>();
 
-        public TModel? Find(Expression<Func<TModel, bool>> expression, bool asTraking = true)
+        public virtual TModel? Find(Expression<Func<TModel, bool>> expression, bool asTraking = true)
         {
             var query = this._dbSet.AsQueryable();
 
@@ -29,7 +29,7 @@ namespace Catalog.Api.Data.Repositories
             return query.FirstOrDefault();
         }
 
-        public async Task<TModel?> FindAsync(Expression<Func<TModel, bool>> expression, bool asTraking = false)
+        public virtual async Task<TModel?> FindAsync(Expression<Func<TModel, bool>> expression, bool asTraking = false)
         {
             var query = this._dbSet.AsQueryable();
 
@@ -44,7 +44,7 @@ namespace Catalog.Api.Data.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<IList<TModel>> GetAllAsync(Expression<Func<TModel, bool>>? expression = null, bool asTraking = false)
+        public virtual async Task<IList<TModel>> GetAllAsync(Expression<Func<TModel, bool>>? expression = null, bool asTraking = false)
         {
             var query = _dbSet.AsQueryable();
 
@@ -59,12 +59,12 @@ namespace Catalog.Api.Data.Repositories
             return await query.ToListAsync();
         }
 
-        public TModel? GetById(Tkey id)
+        public virtual TModel? GetById(Tkey id)
         {
             return _dbSet.FirstOrDefault(x => x.Id.Equals(id));
         }
 
-        public async Task<TModel?> GetByIdAsync(Tkey id)
+        public virtual async Task<TModel?> GetByIdAsync(Tkey id)
         {
             return await _dbSet.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }

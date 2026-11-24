@@ -4,12 +4,11 @@
       "UpstreamPathTemplate": "/api/Auth{everything}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
       "DownstreamPathTemplate": "/api/Auth{everything}",
-      "DownstreamScheme": "https",
-      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "auth.api",
-          "Port": 8081
+          "Port": 8080
         }
       ]
     },
@@ -17,12 +16,11 @@
       "UpstreamPathTemplate": "/api/Cart{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/Cart{everything}",
-      "DownstreamScheme": "https",
-      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "cart.api",
-          "Port": 8081
+          "Port": 8080
         }
       ]
     },
@@ -30,12 +28,12 @@
       "UpstreamPathTemplate": "/api/Catalog{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/Catalog{everything}",
-      "DownstreamScheme": "https",
-      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamScheme": "http",
+
       "DownstreamHostAndPorts": [
         {
           "Host": "catalog.api",
-          "Port": 8081
+          "Port": 8080
         }
       ]
     },
@@ -43,17 +41,16 @@
       "UpstreamPathTemplate": "/api/Order{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/Order{everything}",
-      "DownstreamScheme": "https",
-      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "order.api",
-          "Port": 8081
+          "Port": 8080
         }
       ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:8081"
+    "BaseUrl": "http://localhost:8080"
   }
 }

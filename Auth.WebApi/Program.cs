@@ -8,17 +8,6 @@ using System.Text.Json;
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(builder =>
-        {
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-
-        });
-    });
 
     // Add services to the container.
     InjectionContainer.RegisterServices(builder.Services, builder.Configuration);
@@ -29,40 +18,45 @@ try
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
         });
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwagger(typeof(Program).Assembly);
-
-    AuthorizationExtension.AddAuthorization(builder.Services, builder.Configuration);
-    AuthenticationExtension.AddAuthentication(builder.Services, builder.Configuration);
+    // DICA: Auth deve vir antes do Identity em alguns cenários, mas aqui está ok
+    builder.Services.AddAuthorization(builder.Configuration);
+    builder.Services.AddAuthentication(builder.Configuration);
 
     builder.Services.AddIdentity<UserModel, IdentityRole>()
         .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();
 
-    var connection = builder.Configuration.GetConnectionString("AuthConnection") 
-        ?? throw new ArgumentNullException("Connection string not found");
+    var connection = builder.Configuration.GetConnectionString("Database")
+        ?? throw new InvalidOperationException("Connection string 'Database' was not configured.");
 
-    builder.Services.AddDbContext<AuthDbContext>(options =>
+    builder.Services.AddDbContext<AuthDbContext>((sp, options) =>
     {
         options.UseNpgsql(connection, opt =>
         {
             opt.SetPostgresVersion(new Version(16, 4));
             opt.EnableRetryOnFailure(3);
+            opt.MigrationsAssembly(typeof(AuthDbContext).Assembly.FullName!);
         });
-        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
-        options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
     });
 
-    // responsabilidades transversais
     builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
+    // Modo job: `docker compose run --rm auth.webapi --migrate` aplica as
+    // migrations uma unica vez e encerra, antes de subir as replicas novas.
+    if (args.Contains("--migrate"))
+    {
+        app.ApplyMigrations();
+        return;
+    }
+
     if (!app.Environment.IsProduction())
     {
         app.UseSwagger();
@@ -72,30 +66,26 @@ try
             options.RoutePrefix = string.Empty;
         });
 
-        if(app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
             app.ApplyMigrations();
         }
     }
 
-    app.UseCors();
-
     app.UseExceptionHandler(options => { });
 
-    app.UseHttpsRedirection();
-
     app.UseAuthentication();
-
     app.UseAuthorization();
 
     app.MapControllers();
 
     app.Run();
 
-}catch (Exception ex)
+}
+catch (Exception ex)
 {
     Console.WriteLine(ex.Message);
+
     throw;
 }
-

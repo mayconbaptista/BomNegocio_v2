@@ -1,6 +1,4 @@
-﻿
-using BuildBlocks.WebApi.Extensions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +8,7 @@ namespace BuildBlocks.WebApi.Extensions
 {
     public static class AuthenticationExtension
     {
-        public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             var authenticationConf = configuration.GetSection("Authentication:Schemes:Bearer")
                 ?? throw new ArgumentNullException("Erro ao Obter a configuração de autenticação");
@@ -54,6 +52,8 @@ namespace BuildBlocks.WebApi.Extensions
                 };
 #endif
             });
+
+            return services;
         }
     }
 }
